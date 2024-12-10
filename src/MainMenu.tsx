@@ -1,14 +1,16 @@
 import { Button, Heading, Flex, View } from '@aws-amplify/ui-react';
 import { useAuthenticator } from '@aws-amplify/ui-react';
+import { useNavigate } from 'react-router-dom'; // import the useNavigate hook
 
-const GameApp = () => {
+const MainMenu = () => {
 
     const { user, signOut } = useAuthenticator();
+    const navigate = useNavigate(); // initialize navigate
 
     // Main menu buttons
     const handleNewGame = () => {
         console.log('New game started!');
-        // Implement your logic to start a new game here
+        navigate('/gameplay'); // navigate to the gameplay screen
     };
 
     const handleContinueGame = () => {
@@ -27,32 +29,32 @@ const GameApp = () => {
     };
 
     return (
-        <View padding="2rem">
-        <Flex direction="column" gap="1rem" alignItems="center">
-            <Heading level={1}>Welcome, {user?.signInDetails?.loginId?.toUpperCase()}</Heading>
+        <View className="main-menu" padding = "2rem">
+            <Flex direction="column" gap="1rem" alignItems="center">
+                <Heading level={1}>Welcome, {user?.signInDetails?.loginId?.toUpperCase()}</Heading>
 
-            <Button variation="primary" size="large" onClick={handleNewGame}>
-            New Game
-            </Button>
+                <Button variation="primary" size="large" onClick={handleNewGame}>
+                New Game
+                </Button>
 
-            <Button variation="primary" size="large" onClick={handleContinueGame}>
-            Continue Game
-            </Button>
+                <Button variation="primary" size="large" onClick={handleContinueGame}>
+                Continue Game
+                </Button>
 
-            <Button variation="primary" size="large" onClick={handleLeaderboards}>
-            Leaderboards
-            </Button>
+                <Button variation="primary" size="large" onClick={handleLeaderboards}>
+                Leaderboards
+                </Button>
 
-            <Button variation="primary" size="large" onClick={handleSettings}>
-            Settings
-            </Button>
+                <Button variation="primary" size="large" onClick={handleSettings}>
+                Settings
+                </Button>
 
-            <Button variation="destructive" size="small" onClick={signOut}>
-            Sign Out
-            </Button>
-        </Flex>
+                <Button variation="destructive" size="small" onClick={signOut}>
+                Sign Out
+                </Button>
+            </Flex>
         </View>
   );
 };
 
-export default GameApp;
+export default MainMenu;
