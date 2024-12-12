@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { PlayerModel } from './playerModel';
 import { BossModel } from './bossModel'; // Import BossModel
 import { Button, Input, Flex, Heading, View } from '@aws-amplify/ui-react';
@@ -9,7 +9,7 @@ import { HiOutlineArrowSmallUp, HiOutlineArrowSmallDown, HiOutlineArrowSmallLeft
 import wordDict from './assets/words_dictionary.json'; 
 
 const GamePlay = () => {
-  const [username, setUsername] = useState('');
+  const { avatarName, pathId } = useParams();
   const [player, setPlayer] = useState<PlayerModel | null>(null);
   const [boss, setBoss] = useState<BossModel | null>(null); // Boss state
   const [userInput, setUserInput] = useState(''); // User's input
@@ -70,16 +70,19 @@ const GamePlay = () => {
       pickRandomWord();
     }
   }, [player]);
+
+  // Create player and boss when the game starts
+  useEffect(() => {
+    if (avatarName && !player) {
+      handleCreatePlayer();
+    }
+  }, [avatarName, player]);
   
   const handleCreatePlayer = () => {
-    if (username.trim()) {
-      const newPlayer = new PlayerModel('1', username);
-      const newBoss = new BossModel('Dark Overlord', 200, 20); // Create the boss
-      setPlayer(newPlayer);
-      setBoss(newBoss);
-    } else {
-      alert('Please enter a valid username!');
-    }
+    const newPlayer = new PlayerModel('1', avatarName!);
+    const newBoss = new BossModel('Dark Overlord', 200, 20); // Create the boss
+    setPlayer(newPlayer);
+    setBoss(newBoss);
   };
 
   const handleReturnToMenu = () => {
@@ -238,20 +241,7 @@ const GamePlay = () => {
       <Flex direction="column" gap="1rem" alignItems="center">
         {!player ? (
           <>
-            <Heading level={1}>Create Your Character</Heading>
-            <Input
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter your username"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleCreatePlayer();
-                }
-              }}
-            />
-            <Button variation="primary" size="large" onClick={handleCreatePlayer}>
-              Start Game
-            </Button>
+            handleCreatePlayer();
           </>
         ) : (
           <>

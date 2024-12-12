@@ -10,7 +10,7 @@ const MainMenu = () => {
     // Main menu buttons
     const handleNewGame = () => {
         console.log('New game started!');
-        navigate('/gameplay'); // navigate to the gameplay screen
+        navigate('/pathselection'); // navigate to the gameplay screen
     };
 
     const handleContinueGame = () => {
@@ -49,7 +49,7 @@ const MainMenu = () => {
                 Settings
                 </Button>
 
-                <Button variation="destructive" size="small" onClick={signOut}>
+                <Button variation="destructive" size="large" style={{margin:'1rem'}}onClick={signOut}>
                 Sign Out
                 </Button>
             </Flex>
