@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PlayerModel } from './playerModel';
 import { BossModel } from './bossModel'; // Import BossModel
@@ -7,9 +7,10 @@ import { IoIosHeart } from "react-icons/io";
 import { MdHeartBroken } from "react-icons/md";
 import { HiOutlineArrowSmallUp, HiOutlineArrowSmallDown, HiOutlineArrowSmallLeft, HiOutlineArrowSmallRight } from "react-icons/hi2";
 import wordDict from './assets/words_dictionary.json'; 
+import axios from 'axios';
 
 const GamePlay = () => {
-  const { avatarName, pathId } = useParams();
+  const { avatarName } = useParams();
   const [player, setPlayer] = useState<PlayerModel | null>(null);
   const [boss, setBoss] = useState<BossModel | null>(null); // Boss state
   const [userInput, setUserInput] = useState(''); // User's input
@@ -80,7 +81,7 @@ const GamePlay = () => {
   
   const handleCreatePlayer = () => {
     const newPlayer = new PlayerModel('1', avatarName!);
-    const newBoss = new BossModel('Dark Overlord', 200, 20, 50); // Create the boss
+    const newBoss = new BossModel('Dark Overlord', 150, 20, 50); // Create the boss
     setPlayer(newPlayer);
     setBoss(newBoss);
   };
@@ -91,19 +92,36 @@ const GamePlay = () => {
 
   // Function to handle boss defeat
   const handleBossDefeat = () => {
-    if (defeatedBossCount === 1) {
+    if(boss){
+      player?.gainMoney(boss.bounty);
+      player?.gainScore(boss.score);
+    }
+    if (defeatedBossCount === 2) {  
       // After the second boss is defeated, end the game
       alert('You have defeated both bosses! You win!');
-      navigate('/'); // Navigate back to the main menu or the end screen
+      updateLeaderboard(player?.username ?? "temp", player?.score ?? 0);
+      navigate('/'); // Navigate back to the main menu
     } else {
       // Generate a new boss after defeating the current one
-      const newBoss = new BossModel('Dark Overlord II', 400, 40, 100); // New boss
+      alert("The Dark Overlord rises AGAIN!!!")
+      const newBoss = new BossModel('Dark Overlord II', 300, 40, 100); // New boss
       setBoss(newBoss);
       setDefeatedBossCount((prevCount) => prevCount + 1); // Increment defeated boss count
-
     }
-    player?.gainMoney(boss?.getBounty() ?? 0);
-    player?.gainScore(boss?.getScore() ?? 0);
+  };
+
+  const updateLeaderboard = async (name: string, score: number) => {  
+    console.log("This is the name and score", name,score)
+    try {
+      const scoreAsString = String(score);  
+      const response = await axios.post('http://localhost:3000/leaderboard', {
+        username: name,
+        score: scoreAsString
+      });
+      console.log('Leaderboard updated', response.data);
+    } catch (error) { 
+      console.error('Error updating leaderboard:', error);
+    }
   };
 
   const renderHearts = (currentHealth: number, maxHealth: number) => {
@@ -127,15 +145,16 @@ const GamePlay = () => {
       setUserInput(''); // Clear the input after attack
       setBoss((prevBoss) => {
         if (!prevBoss) return null;
-        const updatedHealth = Math.max(0, prevBoss.health - 20);
+        const updatedHealth = Math.max(0, prevBoss.health - 100);
+
+        //Picks a new random word
+        pickRandomWord();
 
         if (updatedHealth <= 0) {
-          alert(`${prevBoss.name} has been defeated!`);
           handleBossDefeat(); //Handle the boss defeat logic
           return null;
         }
-        //Picks a new random word
-        pickRandomWord();
+      
         return {
           ...prevBoss,
           health: updatedHealth,
@@ -144,7 +163,7 @@ const GamePlay = () => {
 
       // After each attack, there's a 100% chance to trigger the counterattack
       const randomChance = Math.random();
-      if (randomChance < 1.0) {
+      if (randomChance < 0.5) {
         alert('The boss is counterattacking!');
         setCounterattackInProgress(true); // Trigger counterattack
       }

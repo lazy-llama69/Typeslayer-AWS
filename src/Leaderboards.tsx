@@ -47,7 +47,7 @@ const Leaderboards = () => {
             {leaderboard.map((entry, index) => (
               <TableRow key={index}>
                 <TableCell>{index + 1}</TableCell>
-                <TableCell>{entry.name}</TableCell>
+                <TableCell>{entry.username}</TableCell>
                 <TableCell>{entry.score}</TableCell>
               </TableRow>
             ))}

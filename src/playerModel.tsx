@@ -14,6 +14,8 @@ export interface Item {
     experience: number;    // Experience points to level up
     inventory: Item[];     // Inventory of items the player holds
     equippedItems: Item[]; // Items the player currently has equipped (e.g., weapon, armor)
+    money: number;         // Money the player currently has
+    score: number;         // Player overall score 
   }
   
   // Player Model Class with Methods
