@@ -26,6 +26,8 @@ export interface Item {
     experience: number;
     inventory: Item[];
     equippedItems: Item[];
+    money: number;
+    score: number;
   
     constructor(id: string, username: string) {
       this.id = id;
@@ -36,6 +38,8 @@ export interface Item {
       this.experience = 0;   // default experience
       this.inventory = [];   // empty inventory
       this.equippedItems = []; // no items equipped initially
+      this.money = 0;
+      this.score = 0;
     }
   
     // Method to increase experience and level up
@@ -45,6 +49,25 @@ export interface Item {
         this.experience -= this.level * 100;
         this.levelUp();
       }
+    }
+
+    // Method to increase player score
+    gainScore(amount: number){
+      this.score += amount;
+    }
+
+    // Method to handle player money
+    gainMoney(amount:number){
+      this.money += amount;
+    }
+
+    // Method to use money
+    useMoney(amount: number){
+      if (this.money < amount){
+        return false;
+      } 
+      this.money -= amount;
+      return true;
     }
   
     // Method to level up player
@@ -97,6 +120,7 @@ export interface Item {
         level: this.level,
         experience: this.experience,
         inventory: this.inventory.map(i => i.name),
+        money: this.money,
       };
     }
   }

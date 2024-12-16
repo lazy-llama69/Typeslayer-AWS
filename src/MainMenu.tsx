@@ -20,7 +20,7 @@ const MainMenu = () => {
 
     const handleLeaderboards = () => {
         console.log('Opening leaderboards...');
-        // Implement logic for leaderboards here
+        navigate('/leaderboards');
     };
 
     const handleSettings = () => {

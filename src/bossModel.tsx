@@ -1,14 +1,20 @@
+import { SiCoreldraw } from "react-icons/si";
+
 export class BossModel {
     name: string;         // Name of the boss
     health: number;       // Current health
     maxHealth: number;    // Maximum health
     damage: number;       // Damage dealt by the boss
+    bounty: number;       // Reward after killing boss 
+    score: number;
   
-    constructor(name: string, maxHealth: number, damage: number) {
+    constructor(name: string, maxHealth: number, damage: number, bounty: number) {
       this.name = name;
       this.health = maxHealth;
       this.maxHealth = maxHealth;
       this.damage = damage;
+      this.bounty = bounty;
+      this.score = bounty * maxHealth;
     }
   
     // Method to take damage
@@ -20,7 +26,17 @@ export class BossModel {
     heal(amount: number) {
       this.health = Math.min(this.maxHealth, this.health + amount);
     }
-  
+
+    // Method to get bounty:
+    getBounty(): number{
+      return this.bounty;
+    }
+    
+    // Method to get score
+    getScore(): number{
+      return this.score;
+    }  
+    
     // Return boss stats for display or debugging
     getStats() {
       return {
@@ -28,6 +44,8 @@ export class BossModel {
         health: this.health,
         maxHealth: this.maxHealth,
         damage: this.damage,
+        bounty: this.bounty,
+        score: this.score,  
       };
     }
   }

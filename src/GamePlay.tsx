@@ -80,7 +80,7 @@ const GamePlay = () => {
   
   const handleCreatePlayer = () => {
     const newPlayer = new PlayerModel('1', avatarName!);
-    const newBoss = new BossModel('Dark Overlord', 200, 20); // Create the boss
+    const newBoss = new BossModel('Dark Overlord', 200, 20, 50); // Create the boss
     setPlayer(newPlayer);
     setBoss(newBoss);
   };
@@ -97,10 +97,13 @@ const GamePlay = () => {
       navigate('/'); // Navigate back to the main menu or the end screen
     } else {
       // Generate a new boss after defeating the current one
-      const newBoss = new BossModel('Dark Overlord II', 400, 40); // New boss
+      const newBoss = new BossModel('Dark Overlord II', 400, 40, 100); // New boss
       setBoss(newBoss);
       setDefeatedBossCount((prevCount) => prevCount + 1); // Increment defeated boss count
+
     }
+    player?.gainMoney(boss?.getBounty() ?? 0);
+    player?.gainScore(boss?.getScore() ?? 0);
   };
 
   const renderHearts = (currentHealth: number, maxHealth: number) => {
