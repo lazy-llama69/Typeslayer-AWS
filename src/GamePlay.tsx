@@ -10,7 +10,7 @@ import wordDict from './assets/words_dictionary.json';
 import axios from 'axios';
 
 const GamePlay = () => {
-  const { avatarName } = useParams();
+  const { avatarName, pathId, defeatedBossCount: totalDefeatedBossCount } = useParams();
   const [player, setPlayer] = useState<PlayerModel | null>(null);
   const [boss, setBoss] = useState<BossModel | null>(null); // Boss state
   const [userInput, setUserInput] = useState(''); // User's input
@@ -19,7 +19,8 @@ const GamePlay = () => {
   const [timeLeft, setTimeLeft] = useState(3); // 3 seconds to dodge
   const [counterattackInProgress, setCounterattackInProgress] = useState(false); // Track if counterattack is happening
   const [currentWord, setCurrentWord] = useState('');
-  const [defeatedBossCount, setDefeatedBossCount] = useState(0); // Track number of defeated bosses
+  const [defeatedBossCount, setDefeatedBossCount] = useState<number>(parseInt(totalDefeatedBossCount || '0', 10)); // Track number of defeated bosses
+  const [playerCreated, setPlayerCreated] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -74,16 +75,40 @@ const GamePlay = () => {
 
   // Create player and boss when the game starts
   useEffect(() => {
-    if (avatarName && !player) {
+    if (avatarName && !playerCreated) {
       handleCreatePlayer();
     }
-  }, [avatarName, player]);
+  }, [avatarName, player, playerCreated]);
+  
+
+  useEffect(() => {
+    // Check if the boss is defeated after state change
+    if (boss && boss.health <= 0) {
+      handleBossDefeat();
+    }
+  }, [boss]); // This effect runs when `boss` state changes
+
   
   const handleCreatePlayer = () => {
+    if (playerCreated || player) return;
+
     const newPlayer = new PlayerModel('1', avatarName!);
-    const newBoss = new BossModel('Dark Overlord', 150, 20, 50); // Create the boss
     setPlayer(newPlayer);
-    setBoss(newBoss);
+    setPlayerCreated(true);
+    handCreateBoss();
+    setDefeatedBossCount(defeatedBossCount)
+  };
+
+  const bosses = {
+    "1": ['Slendy Manny', 150, 25, 50],
+    "2": ['The Wicked Witch', 150, 25, 50],
+    "3": ['Shopkeeper', 150, 25, 50],
+  };
+
+  const handCreateBoss = () => {
+      const [name, health, attack, reward] = bosses[pathId] || ['ERROR 404', 450, 55, 250];
+      const newBoss = new BossModel(name, health, attack, reward);
+      setBoss(newBoss);
   };
 
   const handleReturnToMenu = () => {
@@ -92,22 +117,29 @@ const GamePlay = () => {
 
   // Function to handle boss defeat
   const handleBossDefeat = () => {
-    if(boss){
+    if (boss){
+      // console.log("Handle boss defeat called");
       player?.gainMoney(boss.bounty);
       player?.gainScore(boss.score);
+      alert('You have defeated the boss');
+      console.log("This is the players money",player?.money);
+      console.log('This is the defeated boss count', defeatedBossCount);
     }
     if (defeatedBossCount === 2) {  
       // After the second boss is defeated, end the game
-      alert('You have defeated both bosses! You win!');
-      updateLeaderboard(player?.username ?? "temp", player?.score ?? 0);
-      navigate('/'); // Navigate back to the main menu
+      alert('You have defeated all bosses! You win!');
+      handleEnd();
     } else {
-      // Generate a new boss after defeating the current one
-      alert("The Dark Overlord rises AGAIN!!!")
-      const newBoss = new BossModel('Dark Overlord II', 300, 40, 100); // New boss
-      setBoss(newBoss);
-      setDefeatedBossCount((prevCount) => prevCount + 1); // Increment defeated boss count
+      // Continues the journey and lets the player choose a new path
+      setDefeatedBossCount((prevCount) => prevCount + 1);
+      navigate(`/pathselection/${avatarName}/${defeatedBossCount+1}`); 
+      
     }
+  };
+
+  const handleEnd = () => {
+    updateLeaderboard(player?.username ?? "error", player?.score ?? 0);
+    navigate('/')
   };
 
   const updateLeaderboard = async (name: string, score: number) => {  
@@ -149,11 +181,6 @@ const GamePlay = () => {
 
         //Picks a new random word
         pickRandomWord();
-
-        if (updatedHealth <= 0) {
-          handleBossDefeat(); //Handle the boss defeat logic
-          return null;
-        }
       
         return {
           ...prevBoss,
@@ -262,9 +289,7 @@ const GamePlay = () => {
       </Button>
       <Flex direction="column" gap="1rem" alignItems="center">
         {!player ? (
-          <>
-            handleCreatePlayer();
-          </>
+          <p>Loading player...</p>
         ) : (
           <>
             <Heading level={1}>Battle!</Heading>

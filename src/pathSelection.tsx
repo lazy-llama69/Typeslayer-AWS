@@ -1,8 +1,10 @@
 // pathSelection.tsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button, Input, Collection, Card, Image, View, Flex, Badge, Divider, Heading } from '@aws-amplify/ui-react';
-
+import { useNavigate, useParams } from 'react-router-dom';
+import { Button, Collection, Card, Image, View, Flex, Badge, Divider, Heading } from '@aws-amplify/ui-react';
+import forestCabin from './assets/forest_cabin.jpg';
+import ybr from './assets/yellowbrickroad.jpg';
+import shop from './assets/shop.jpg';
 
 // Interface for Path Item
 interface PathItem {
@@ -15,7 +17,7 @@ interface PathItem {
 
 const PathSelection = () => {
     const navigate = useNavigate();
-    const [avatarName, setAvatarName] = useState('');
+    const { avatarName, defeatedBossCount } = useParams();
     const [selectedPath, setSelectedPath] = useState<number | null>(null);
 
     // Handle return to menu
@@ -27,58 +29,43 @@ const PathSelection = () => {
         {
         title: 'The Dark Forest',
         badges: ['Easy', 'Poison'],
-        imageUrl: 'src/assets/forest_cabin.jpg',
+        imageUrl: forestCabin,
         pathId: 1,
         },
         {
         title: 'Yellow Brick Road',
         badges: ['Hard', 'Heal'],
-        imageUrl: 'src/assets/yellowbrickroad.jpg',
+        imageUrl: ybr,
         pathId: 2,
         },
         {
         title: 'The Haunted Castle',
         badges: ['Medium', 'Fire'],
-        imageUrl: 'src/assets/shop.jpg',
+        imageUrl: shop,
         pathId: 3,
         },
     ];
 
     // Handle name submission and path selection
     const handleStartGame = () => {
-        if (!avatarName.trim()) {
-            alert('Please enter your avatar name.');
-            return;
-        }
-
         if (selectedPath === null) {
             alert('Please select a path.');
             return;
         }
-
         // Pass the avatar name and selected path to the GamePlay component
-        navigate(`/gameplay/${avatarName}/${selectedPath}`);
+        navigate(`/gameplay/${avatarName}/${selectedPath}/${defeatedBossCount}`);
     };
 
     return (
     <View padding="2rem">
         <Flex direction="column" gap="0.5rem" justifyContent="center" alignItems="center">
-            <Heading level={1}>Enter Avatar Name</Heading>
-            <Input
-                value={avatarName}
-                onChange={(e) => setAvatarName(e.target.value)}
-                placeholder="Enter your avatar name"
-                onKeyDown={(e) => {
-                if (e.key === 'Enter') handleStartGame();
-                }}
-            />
-        </Flex>
-
-        
-        <Flex direction="column" gap="0.5rem" justifyContent="center" alignItems="center">
             <Heading level={2} marginTop="1rem">
                 Choose Your Path
             </Heading>
+            <p>
+            Bosses Defeated: {defeatedBossCount}
+
+            </p>
             <Collection items={items} type="list" direction="row" gap="20px" wrap="nowrap">
                 {(item, index) => (
                 <Card
@@ -132,7 +119,7 @@ const PathSelection = () => {
             isDisabled={!avatarName || selectedPath === null}
             style={{ marginTop: '1rem' }}
         >
-            Start Game
+            Choose path
         </Button>
         <Button
             variation='primary'

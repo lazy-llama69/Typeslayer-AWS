@@ -10,7 +10,7 @@ const MainMenu = () => {
     // Main menu buttons
     const handleNewGame = () => {
         console.log('New game started!');
-        navigate('/pathselection'); // navigate to the gameplay screen
+        navigate('/nameCreation'); // navigate to the gameplay screen
     };
 
     const handleContinueGame = () => {

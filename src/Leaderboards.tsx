@@ -31,7 +31,7 @@ const Leaderboards = () => {
 
   return (
     <View padding="2rem">
-      <Heading level={1}>Leaderboard</Heading>
+      <Heading level={1}>Leaderboards</Heading>
       {loading ? (
         <p>Loading...</p>
       ) : (
