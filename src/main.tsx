@@ -9,6 +9,7 @@ import  MainMenu  from "./MainMenu";
 import GamePlay from "./GamePlay"; // Import your GamePlay component
 import PathSelection from "./pathSelection";
 import Leaderboards from "./Leaderboards";
+import './index.css';
 
 Amplify.configure(outputs);
 
