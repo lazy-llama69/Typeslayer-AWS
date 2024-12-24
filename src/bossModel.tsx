@@ -15,10 +15,18 @@ export class BossModel {
       this.score = bounty;
     }
   
-    // Method to take damage
-    takeDamage(amount: number) {
-      this.health = Math.max(0, this.health - amount);
+    // Method to apply damage to the boss
+    takeDamage(damage: number): BossModel {
+      const newHealth = Math.max(0, this.health - damage); // Ensure health doesn't go below 0
+      return new BossModel(this.name, this.maxHealth, this.damage, this.bounty) // Return a new BossModel instance
+        .setHealth(newHealth); // Set the new health value
     }
+
+    // Helper method to set health (can be used in combination with takeDamage)
+    setHealth(health: number): BossModel {
+      this.health = health;
+      return this;
+    } 
   
     // Method to heal
     heal(amount: number) {

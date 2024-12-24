@@ -20,6 +20,7 @@ mongoose.connect(process.env.MONGODB_URI)
 const leaderboardSchema = new mongoose.Schema({
   username: { type: String, required: true },
   score: { type: String, required: true },
+  bossCount: { type: Number, required: true}, 
 });
 
 // Create a model
@@ -40,8 +41,8 @@ app.get("/leaderboard", async (req, res) => {
 
 // Endpoint to update leaderboard
 app.post("/leaderboard", async (req, res) => {
-  const { username, score } = req.body;
-  if (!username || !score) {
+  const { username, score, bossCount } = req.body;
+  if (!username || !score || !bossCount) {
     return res.status(400).json({ message: "Name and score are required!" });
   }
   try {
@@ -51,11 +52,12 @@ app.post("/leaderboard", async (req, res) => {
     if (existingPlayer) {
       // If player exists, update the score
       existingPlayer.score = Math.max(existingPlayer.score, score); // Update only if the new score is higher
+      existingPlayer.bossCount = Math.max(existingPlayer.bossCount, bossCount); // Keep the higher bossCount
       await existingPlayer.save();
       return res.json(existingPlayer);
     } else {
       // If player doesn't exist, create a new entry
-      const newPlayer = new Leaderboard({ username, score });
+      const newPlayer = new Leaderboard({ username, score, bossCount });
       await newPlayer.save();
       return res.status(201).json(newPlayer);
     }

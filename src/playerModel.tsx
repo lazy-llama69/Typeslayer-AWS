@@ -53,16 +53,6 @@ export interface Item {
       }
     }
 
-    // Method to increase player score
-    gainScore(amount: number){
-      this.score += amount;
-    }
-
-    // Method to handle player money
-    gainMoney(amount:number){
-      this.money += amount;
-    }
-
     // Method to use money
     useMoney(amount: number){
       if (this.money < amount){

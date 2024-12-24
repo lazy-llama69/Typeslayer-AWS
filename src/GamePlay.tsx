@@ -78,7 +78,7 @@ const GamePlay = () => {
     if (avatarName && !playerCreated) {
       handleCreatePlayer();
     }
-  }, [avatarName, player, playerCreated]);
+  }, [avatarName, playerCreated]);
   
 
   useEffect(() => {
@@ -88,7 +88,39 @@ const GamePlay = () => {
     }
   }, [boss]); // This effect runs when `boss` state changes
 
+  useEffect(() => {
+    loadPlayerData();
+  }, []);
   
+  const savePlayerData = () => {
+    if (player) {
+      localStorage.setItem('playerScore', JSON.stringify(player.score));
+      localStorage.setItem('playerMoney', JSON.stringify(player.money));
+    }
+  };
+
+  const loadPlayerData = () => {
+    const storedScore = localStorage.getItem('playerScore');
+    const storedMoney = localStorage.getItem('playerMoney');
+  
+    if (storedScore && storedMoney) {
+      setPlayer((prevPlayer) => {
+        // Check if prevPlayer is null and create a new player if it is
+        return {
+          ...prevPlayer,  // If prevPlayer exists, spread its properties
+          score: JSON.parse(storedScore),  // Update score
+          money: JSON.parse(storedMoney),  // Update money
+          // Add any other necessary properties to ensure PlayerModel is complete
+        } as PlayerModel;
+      });
+    } else {
+      // If no data is found, you could reset to default values (e.g., score 0, money 0)
+      setPlayer(new PlayerModel('1', 'defaultUsername'));  // Default player creation
+    }
+  };
+  
+  
+
   const handleCreatePlayer = () => {
     if (playerCreated || player) return;
 
@@ -96,7 +128,7 @@ const GamePlay = () => {
     setPlayer(newPlayer);
     setPlayerCreated(true);
     handCreateBoss();
-    setDefeatedBossCount(defeatedBossCount)
+    setDefeatedBossCount(defeatedBossCount);
   };
 
   const bosses = {
@@ -117,15 +149,16 @@ const GamePlay = () => {
 
   // Function to handle boss defeat
   const handleBossDefeat = () => {
-    if (boss){
+    if (boss && player){
       // console.log("Handle boss defeat called");
-      player?.gainMoney(boss.bounty);
-      player?.gainScore(boss.score);
+      player.money += boss.bounty;
+      player.score += boss.score;
+      savePlayerData(); // Save updated player data after defeating the boss
       alert('You have defeated the boss');
       console.log("This is the players money",player?.money);
-      console.log('This is the defeated boss count', defeatedBossCount);
+      console.log('This is the defeated boss count', defeatedBossCount+1);
     }
-    if (defeatedBossCount === 2) {  
+    if (defeatedBossCount+1 === 2) {  
       // After the second boss is defeated, end the game
       alert('You have defeated all bosses! You win!');
       handleEnd();
@@ -138,6 +171,7 @@ const GamePlay = () => {
   };
 
   const handleEnd = () => {
+    localStorage.clear();
     updateLeaderboard(player?.username ?? "error", player?.score ?? 0);
     navigate('/')
   };
@@ -146,9 +180,11 @@ const GamePlay = () => {
     console.log("This is the name and score", name,score)
     try {
       const scoreAsString = String(score);  
+      const bossCount = defeatedBossCount+1;
       const response = await axios.post('http://localhost:3000/leaderboard', {
         username: name,
-        score: scoreAsString
+        score: scoreAsString,
+        bossCount,
       });
       console.log('Leaderboard updated', response.data);
     } catch (error) { 
@@ -195,7 +231,17 @@ const GamePlay = () => {
         setCounterattackInProgress(true); // Trigger counterattack
       }
     } else {
-      alert('Incorrect word! Try again.');
+      alert('YOu messed up your attack, the boss heals!!');
+      pickRandomWord(); // Pick a new random word
+      setBoss((prevBoss) => {
+        if (!prevBoss) return null;
+        
+        const healedHealth = Math.min(prevBoss.maxHealth, prevBoss.health + 50); // Heal the boss by 50
+        return {
+          ...prevBoss,
+          health: healedHealth, // Apply healing
+        };
+      });
     }
   };
 

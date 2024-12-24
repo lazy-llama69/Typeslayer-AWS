@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 type LeaderboardEntry = {
   username: string;
   score: number;
+  bossCount: number;
 };
 
 const Leaderboards = () => {
@@ -35,12 +36,13 @@ const Leaderboards = () => {
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <Table caption="Top Players">
+        <Table>
           <TableHead>
             <TableRow>
               <TableCell as="th">Rank</TableCell>
               <TableCell as="th">Username</TableCell>
               <TableCell as="th">Score</TableCell>
+              <TableCell as="th">Bosses Killed</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -49,6 +51,7 @@ const Leaderboards = () => {
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{entry.username}</TableCell>
                 <TableCell>{entry.score}</TableCell>
+                <TableCell>{entry.bossCount}</TableCell>
               </TableRow>
             ))}
           </TableBody>
