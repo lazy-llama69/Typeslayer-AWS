@@ -177,6 +177,11 @@ const PathSelection = () => {
             onClick={handleStartGame}
             isDisabled={!avatarName || selectedPath === null}
             style={{ marginTop: '1rem' }}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleStartGame(); 
+                }
+            }}
         >
             Choose path
         </Button>

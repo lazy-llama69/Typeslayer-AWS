@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { PlayerModel } from './playerModel';
-import { BossModel } from './bossModel'; // Import BossModel
+import { PlayerModel } from './models/playerModel';
+import { BossModel } from './models/bossModel'; 
 import { Button, Input, Flex, Heading, View, Breadcrumbs, ThemeProvider, createTheme } from '@aws-amplify/ui-react';
 import { IoIosHeart } from "react-icons/io";
 import { MdHeartBroken } from "react-icons/md";
 import { HiOutlineArrowSmallUp, HiOutlineArrowSmallDown, HiOutlineArrowSmallLeft, HiOutlineArrowSmallRight } from "react-icons/hi2";
 import wordDict from './assets/words_dictionary.json'; 
 import axios from 'axios';
+import { TraderModel } from './models/traderModel';
 
 
 const GamePlay = () => {
@@ -24,7 +25,7 @@ const GamePlay = () => {
   const [playerCreated, setPlayerCreated] = useState(false);
   const navigate = useNavigate();
   const [breadcrumbs, setBreadcrumbs] = useState<string[]>(['Start']);
-  
+  const [trader, setTrader] = useState<TraderModel | null>(null);
 
   useEffect(() => {
     if (counterattackInProgress) {
@@ -131,6 +132,8 @@ const GamePlay = () => {
     if (playerCreated || player) return;
 
     const newPlayer = new PlayerModel('1', avatarName!);
+    const newTrader = new TraderModel();
+    setTrader(newTrader);
     setPlayer(newPlayer);
     setPlayerCreated(true);
     handCreateBoss();

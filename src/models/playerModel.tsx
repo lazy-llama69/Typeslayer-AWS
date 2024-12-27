@@ -1,9 +1,4 @@
-export interface Item {
-    id: string;
-    name: string;
-    type: 'weapon' | 'armor' | 'potion';
-    effect?: string;  // for items like potions, this could describe the effect (e.g., 'restore health')
-  }
+import { Item } from "../items/item";
   
   export interface Player {
     id: string;            // Unique identifier for the player (could be userId from Cognito)

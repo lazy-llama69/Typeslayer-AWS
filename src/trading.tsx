@@ -1,0 +1,1 @@
+// page to display the items for trade, with an image of the trader creepy version.
