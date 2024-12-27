@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PlayerModel } from './playerModel';
 import { BossModel } from './bossModel'; // Import BossModel
-import { Button, Input, Flex, Heading, View } from '@aws-amplify/ui-react';
+import { Button, Input, Flex, Heading, View, Breadcrumbs, ThemeProvider, createTheme } from '@aws-amplify/ui-react';
 import { IoIosHeart } from "react-icons/io";
 import { MdHeartBroken } from "react-icons/md";
 import { HiOutlineArrowSmallUp, HiOutlineArrowSmallDown, HiOutlineArrowSmallLeft, HiOutlineArrowSmallRight } from "react-icons/hi2";
 import wordDict from './assets/words_dictionary.json'; 
 import axios from 'axios';
+
 
 const GamePlay = () => {
   const { avatarName, pathId, defeatedBossCount: totalDefeatedBossCount } = useParams();
@@ -22,6 +23,8 @@ const GamePlay = () => {
   const [defeatedBossCount, setDefeatedBossCount] = useState<number>(parseInt(totalDefeatedBossCount || '0', 10)); // Track number of defeated bosses
   const [playerCreated, setPlayerCreated] = useState(false);
   const navigate = useNavigate();
+  const [breadcrumbs, setBreadcrumbs] = useState<string[]>(['Start']);
+  
 
   useEffect(() => {
     if (counterattackInProgress) {
@@ -91,7 +94,7 @@ const GamePlay = () => {
   useEffect(() => {
     loadPlayerData();
   }, []);
-  
+
   const savePlayerData = () => {
     if (player) {
       localStorage.setItem('playerScore', JSON.stringify(player.score));
@@ -117,10 +120,13 @@ const GamePlay = () => {
       // If no data is found, you could reset to default values (e.g., score 0, money 0)
       setPlayer(new PlayerModel('1', 'defaultUsername'));  // Default player creation
     }
+
+    const savedBreadcrumbs = localStorage.getItem('breadcrumbs');
+    if (savedBreadcrumbs) {
+        setBreadcrumbs(JSON.parse(savedBreadcrumbs));
+    }
   };
   
-  
-
   const handleCreatePlayer = () => {
     if (playerCreated || player) return;
 
@@ -144,6 +150,7 @@ const GamePlay = () => {
   };
 
   const handleReturnToMenu = () => {
+    localStorage.clear();
     navigate('/');
   };
 
@@ -328,11 +335,48 @@ const GamePlay = () => {
     setCurrentWord(wordKeys[randomIndex]);  // Set the random word from the keys
   };
 
+  const theme = createTheme({
+    name: 'breadcrumbs-theme',
+    tokens: {
+      components: {
+        breadcrumbs: {
+          separator: {
+            color: '{colors.secondary.20}',
+            fontSize: '{fontSizes.xl}',
+            paddingInline: '{space.medium}',
+          },
+          link: {
+            color: '#520e90'
+          },
+        },
+      },
+    },
+  });
+
+
   return (
+    
     <View padding="2rem">
-      <Button variation="primary" size="small" onClick={handleReturnToMenu}>
-        Back to Main Menu
-      </Button>
+      {/* Breadcrumbs Component */}
+      <ThemeProvider theme={theme}>
+            <Breadcrumbs.Container borderRadius="medium" padding="medium">
+                {breadcrumbs.map((text, idx) => (
+                    
+                    <Breadcrumbs.Item key={`${idx}`} color={"#3F00FF"}>
+                        <Breadcrumbs.Link 
+                            isCurrent={idx === breadcrumbs.length - 1}
+                            style={{
+                                fontWeight: 'bold',
+                                textDecoration: 'underline',
+                            }}
+                        >
+                            {text}
+                        </Breadcrumbs.Link>
+                        {idx !== breadcrumbs.length - 1 && <Breadcrumbs.Separator />} {/* Add separator except for the last item */}
+                    </Breadcrumbs.Item>
+                ))}
+            </Breadcrumbs.Container>
+      </ThemeProvider>
       <Flex direction="column" gap="1rem" alignItems="center">
         {!player ? (
           <p>Loading player...</p>
@@ -383,6 +427,9 @@ const GamePlay = () => {
             )}
           </>
         )}
+      <Button variation="primary" size="small" onClick={handleReturnToMenu}>
+        Back to Main Menu
+      </Button>
       </Flex>
     </View>
   );
