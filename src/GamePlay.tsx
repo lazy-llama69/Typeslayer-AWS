@@ -2,14 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PlayerModel } from './models/playerModel';
 import { BossModel } from './models/bossModel'; 
-import { Button, Input, Flex, Heading, View, Breadcrumbs, ThemeProvider, createTheme } from '@aws-amplify/ui-react';
+import { Button, Input, Flex, Heading, View, Breadcrumbs, ThemeProvider, createTheme, Menu, MenuItem, MenuButton, Radio, RadioGroupField, Divider, useTheme, } from '@aws-amplify/ui-react';
 import { IoIosHeart } from "react-icons/io";
 import { MdHeartBroken } from "react-icons/md";
 import { HiOutlineArrowSmallUp, HiOutlineArrowSmallDown, HiOutlineArrowSmallLeft, HiOutlineArrowSmallRight } from "react-icons/hi2";
 import wordDict from './assets/words_dictionary.json'; 
 import axios from 'axios';
 import { TraderModel } from './models/traderModel';
-import { Menu, MenuItem } from '@aws-amplify/ui-react';
 
 
 const GamePlay = () => {
@@ -28,6 +27,8 @@ const GamePlay = () => {
   const [breadcrumbs, setBreadcrumbs] = useState<string[]>(['Start']);
   const [trader, setTrader] = useState<TraderModel | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isInventoryOpen, setIsInventoryOpen] = useState(false);
+  const { tokens } = useTheme();
 
   useEffect(() => {
     if (counterattackInProgress) {
@@ -100,6 +101,10 @@ const GamePlay = () => {
 
   const handleMenuOpenChange = (open: boolean) => {
     setIsMenuOpen(open);
+  };
+
+  const handleInventoryOpenChange = (open: boolean) => {
+    setIsInventoryOpen(open);
   };
 
   const closeMenu = () => setIsMenuOpen(false);
@@ -368,121 +373,181 @@ const GamePlay = () => {
   return (
     
     <View padding="2rem">
-      {/* Add the Menu Component */}
-      <Menu
-        isOpen={isMenuOpen}
-        onOpenChange={handleMenuOpenChange}
-        width="3rem"
-        maxWidth="4rem"
-      >
-        <MenuItem
-          onClick={() => {
-            closeMenu();
-            alert('Resume Game');
-          }}
-        >
-          Resume Game
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            closeMenu();
-            alert('Settings');
-          }}
-        >
-          Settings
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            closeMenu();
-            handleReturnToMenu();
-          }}
-        >
-          Exit to Main Menu
-        </MenuItem>
-      </Menu>
-      {/* Breadcrumbs Component */}
-      <ThemeProvider theme={theme}>
-            <Breadcrumbs.Container borderRadius="medium" padding="medium">
-                {breadcrumbs.map((text, idx) => (
-                    
-                    <Breadcrumbs.Item key={`${idx}`} color={"#3F00FF"}>
-                        <Breadcrumbs.Link 
-                            isCurrent={idx === breadcrumbs.length - 1}
-                            style={{
-                                fontWeight: 'bold',
-                                textDecoration: 'underline',
-                            }}
-                        >
-                            {text}
-                        </Breadcrumbs.Link>
-                        {idx !== breadcrumbs.length - 1 && <Breadcrumbs.Separator />} {/* Add separator except for the last item */}
-                    </Breadcrumbs.Item>
-                ))}
-            </Breadcrumbs.Container>
-      </ThemeProvider>
-      <Flex direction="column" alignItems="center">
-  {!player ? (
-    <p>Loading player...</p>
-  ) : (
-    <>
-      <Heading level={1}>Battle!</Heading>
-      <Flex direction="row" justifyContent="space-between" alignItems="flex-start" width="100%" gap="10rem">
-        {/* Player Section */}
-        <Flex direction="column" alignItems="center" gap="0.5rem">
-          <Heading level={2}>Player:</Heading>
-          <Heading level={2}> {player.username}</Heading>
-          <Flex direction="row" gap="0.5rem" wrap="wrap" maxWidth="315px" justifyContent="center">
-            {renderHearts(player.health, player.maxHealth)}
-          </Flex>
-          <p>Level: {player.level}</p>
-        </Flex>
-
-        {/* Boss Section */}
-        {boss && (
-          <Flex direction="column" alignItems="center" gap="0.5rem">
-            <Heading level={2}>Boss: </Heading>
-            <Heading level={2}> {boss.name}</Heading>
-            <Flex direction="row" gap="0.5rem" wrap="wrap" maxWidth="315px" justifyContent="center">
-              {renderHearts(boss.health, boss.maxHealth)}
-            </Flex>
-          </Flex>
-        )}
-      </Flex>
-
-      {/* Word Input and Attack Section */}
-      <Flex direction="column" gap="0.5rem" alignItems="center">
-        <p>Input the following word to attack:</p>
-        <strong>{currentWord}</strong>
-        <Flex direction="row" gap="0.5rem" justifyContent="center" alignItems="center">
-          <Input
-            placeholder={`Type the word`}
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                handleAttack(); // Trigger attack on Enter key press
-              }
+      {/* The Menu Component */}
+      <View position="absolute" top="0" left="0" padding="1rem"> 
+        <Menu isOpen={isMenuOpen} onOpenChange={handleMenuOpenChange} width="15rem" size="large">
+          <MenuItem
+            onClick={() => {
+              closeMenu();
+              alert('Resume Game');
             }}
-          />
+          >
+            Resume Game
+          </MenuItem>
+            
+          <MenuItem
+            onClick={() => {
+              closeMenu();
+              alert('Settings');
+            }}
+          >
+            Settings
+          </MenuItem>
+          <MenuButton 
+            variation = "destructive"
+            onClick={() => {
+              closeMenu();
+              handleReturnToMenu();
+            }}
+          >
+            Exit to Main Menu
+          </MenuButton>
+        </Menu>
+      </View>
+
+      {/* Inventory menu button*/}
+      <View position="absolute" top="0" left="5rem" padding="1rem"> 
+        <Menu isOpen={isInventoryOpen} onOpenChange={handleInventoryOpenChange} width="15rem" size="large" backgroundColor="#bea9df"
+          trigger={
+          <MenuButton variation="primary" size="large" width="105rem" backgroundColor="#808080">
+            Inventory
+          </MenuButton>
+          }
+        >
+          <Divider orientation="horizontal" size='large' border="5px solid pink" borderRadius="10px" />
+          <Flex direction="row" justifyContent="center">
+            <Heading level={3}><strong>Weapon</strong> </Heading>
+          </Flex>
+          <RadioGroupField
+              legend="small"
+              legendHidden
+              name="weapon"
+              defaultValue="wooden_sword"
+            >
+              <Radio value="wooden_sword">Wooden Sword</Radio>
+              <Radio value="bow">Bow And Arrow</Radio>
+              <Radio value="magic_wand">Magic Wand</Radio>
+            </RadioGroupField>
+          
+          <Divider orientation="horizontal" size='large' border="5px solid pink" borderRadius="10px" />
+          <Flex direction="row" justifyContent="center">
+            <Heading level={3}><strong>Clothing</strong> </Heading>
+          </Flex>
+          <RadioGroupField
+            legend="small"
+            legendHidden
+            name="clothing"
+            defaultValue= "naked"
+          >
+            <Radio value="naked">Naked</Radio>
+            <Radio value="steel_armor">Steel Armour</Radio>
+            <Radio value="fire_vest">Fireproof Vest</Radio>
+          </RadioGroupField>
+
+          <Divider orientation="horizontal" size='large' border="5px solid pink" borderRadius="10px" />
+          <Flex direction="row" justifyContent="center">
+            <Heading level={3}><strong>Potions</strong> </Heading>
+          </Flex>
+
+          <Button>
+            Use Healing Potion
+          </Button>
+
+          <Divider orientation="horizontal" size='large' border="5px solid pink" borderRadius="10px" />
+        </Menu>
+      </View>
+
+      {/*Top section */}
+      <Flex direction="column" alignItems="flex-start">
+        <Flex direction="row" justifyContent="flex-start" width="100%"> 
+          {/* Breadcrumbs Component */}
+          <ThemeProvider theme={theme}>
+                <Breadcrumbs.Container borderRadius="medium" padding="medium">
+                    {breadcrumbs.map((text, idx) => (
+                        
+                        <Breadcrumbs.Item key={`${idx}`} color={"#3F00FF"}>
+                            <Breadcrumbs.Link 
+                                isCurrent={idx === breadcrumbs.length - 1}
+                                style={{
+                                    fontWeight: 'bold',
+                                    textDecoration: 'underline',
+                                }}
+                            >
+                                {text}
+                            </Breadcrumbs.Link>
+                            {idx !== breadcrumbs.length - 1 && <Breadcrumbs.Separator />} {/* Add separator except for the last item */}
+                        </Breadcrumbs.Item>
+                    ))}
+                </Breadcrumbs.Container>
+          </ThemeProvider>
         </Flex>
       </Flex>
 
-      {/* Display the dodge sequence */}
-      {isDodging && (
-        <div>
-          <p>Follow the sequence to dodge:</p>
-          <Flex direction="row" gap="1rem" justifyContent="center">
-            {renderDodgeSequence()}
-          </Flex>
-          <p>Time left to dodge: {timeLeft} seconds</p>
-        </div>
-      )}
-    </>
-      )}
-      <Button variation="primary" size="small" onClick={handleReturnToMenu}>
-        Back to Main Menu
-      </Button>
-    </Flex>
+      {/* Middle section */}
+      <Flex direction="column" alignItems="center">
+        {!player ? (
+          <p>Loading player...</p>
+        ) : (
+          <>
+            <Heading level={1}>Battle!</Heading>
+            <Flex direction="row" justifyContent="space-between" alignItems="flex-start" width="100%" gap="10rem">
+              {/* Player Section */}
+              <Flex direction="column" alignItems="center" gap="0.5rem">
+                <Heading level={2}>Player:</Heading>
+                <Heading level={2}> {player.username}</Heading>
+                <Flex direction="row" gap="0.5rem" wrap="wrap" maxWidth="315px" justifyContent="center">
+                  {renderHearts(player.health, player.maxHealth)}
+                </Flex>
+                <p>Level: {player.level}</p>
+              </Flex>
+
+              {/* Boss Section */}
+              {boss && (
+                <Flex direction="column" alignItems="center" gap="0.5rem">
+                  <Heading level={2}>Boss: </Heading>
+                  <Heading level={2}> {boss.name}</Heading>
+                  <Flex direction="row" gap="0.5rem" wrap="wrap" maxWidth="315px" justifyContent="center">
+                    {renderHearts(boss.health, boss.maxHealth)}
+                  </Flex>
+                </Flex>
+              )}
+            </Flex>
+            
+      {/* Bottom section */}
+            {/* Word Input and Attack Section */}
+            <Flex direction="column" gap="0.5rem" alignItems="center">
+              <p>Input the following word to attack: <strong>{currentWord}</strong></p>
+              
+              <Flex direction="row" gap="0.5rem" justifyContent="center" alignItems="center">
+                <Input
+                  placeholder={`Type the word`}
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleAttack(); // Trigger attack on Enter key press
+                    }
+                  }}
+                />
+              </Flex>
+            </Flex>
+
+            {/* Display the dodge sequence */}
+            {isDodging && (
+              <div>
+                <p>Follow the sequence to dodge:</p>
+                <Flex direction="row" gap="1rem" justifyContent="center">
+                  {renderDodgeSequence()}
+                </Flex>
+                <p>Time left to dodge: {timeLeft} seconds</p>
+              </div>
+            )}
+          </>
+            )}
+            <Button variation="destructive" size="small" onClick={handleReturnToMenu}>
+              Back to Main Menu
+            </Button>
+      </Flex>
     </View>
   );
 };
