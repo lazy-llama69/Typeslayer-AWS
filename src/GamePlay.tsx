@@ -10,7 +10,8 @@ import wordDict from './assets/words_dictionary.json';
 import axios from 'axios';
 import { TraderModel } from './models/traderModel';
 import { GiPotionBall, GiCrossedSwords, GiShoulderArmor } from "react-icons/gi";
-
+import wicked from './assets/bosses/wicked_witch.jpg';
+import protagonist from './assets/bosses/protagonist.jpg';
 
 const GamePlay = () => {
   const { avatarName, pathId, defeatedBossCount: totalDefeatedBossCount } = useParams();
@@ -439,6 +440,7 @@ const GamePlay = () => {
           </MenuItem>
             
           <MenuItem
+            isDisabled={true}
             onClick={() => {
               closeMenu();
               alert('Settings');
@@ -552,6 +554,11 @@ const GamePlay = () => {
               <Flex direction="column" alignItems="center" gap="0.5rem">
                 <Heading level={2}>Player:</Heading>
                 <Heading level={2}> {player.username}</Heading>
+                <img
+                  src={protagonist} // Adjust the path as needed
+                  alt={`${player.username}`}
+                  style={{ width: '300px', height: '200px', objectFit: 'cover', borderRadius: '8px' }}
+                />
                 <Flex direction="row" gap="0.5rem" wrap="wrap" maxWidth="315px" justifyContent="center">
                   {renderHearts(player.health, player.maxHealth)}
                 </Flex>
@@ -563,6 +570,11 @@ const GamePlay = () => {
                 <Flex direction="column" alignItems="center" gap="0.5rem">
                   <Heading level={2}>Boss: </Heading>
                   <Heading level={2}> {boss.name}</Heading>
+                  <img
+                    src={(wicked)} 
+                    alt={`${boss.name}`}
+                    style={{ width: '300px', height: '200px', objectFit: 'cover', borderRadius: '8px' }}
+                  />
                   <Flex direction="row" gap="0.5rem" wrap="wrap" maxWidth="315px" justifyContent="center">
                     {renderHearts(boss.health, boss.maxHealth)}
                   </Flex>

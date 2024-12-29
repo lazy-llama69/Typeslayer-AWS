@@ -37,7 +37,7 @@ const MainMenu = () => {
                 New Game
                 </Button>
 
-                <Button variation="primary" size="large" onClick={handleContinueGame}>
+                <Button variation="primary" size="large" onClick={handleContinueGame} isDisabled={true}>
                 Continue Game
                 </Button>
 
@@ -45,7 +45,7 @@ const MainMenu = () => {
                 Leaderboards
                 </Button>
 
-                <Button variation="primary" size="large" onClick={handleSettings}>
+                <Button variation="primary" size="large" onClick={handleSettings} isDisabled={true}>
                 Settings
                 </Button>
 
