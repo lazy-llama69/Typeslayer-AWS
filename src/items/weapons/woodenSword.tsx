@@ -1,12 +1,12 @@
 // ironSword.tsx
-import { Item } from './item';
+import { Item } from '../item';
 
 const woodenSword: Item = {
-  id: '2',
+  id: '1001',
   name: 'Measly Wooden Sword',
   type: 'weapon',
   price: 10,
-  effect: 'null',
+  effect: '50',
   url: './assets/items/wooden_sword.jpg',
 };
 

@@ -1,4 +1,10 @@
+import bow_and_arrow from "../items/weapons/bow_and_arrow";
 import { Item } from "../items/item";
+import magic_wand from "../items/weapons/magic_wand";
+import steelArmor from "../items/armor/steelArmor";
+import fireArmor from "../items/armor/fireArmor";
+import woodenSword from "../items/weapons/woodenSword";
+import woodenArmor from "../items/armor/woodenArmor";
   
   export interface Player {
     id: string;            // Unique identifier for the player (could be userId from Cognito)
@@ -11,6 +17,8 @@ import { Item } from "../items/item";
     equippedItems: Item[]; // Items the player currently has equipped (e.g., weapon, armor)
     money: number;         // Money the player currently has
     score: number;         // Player overall score 
+    damage: number;        // Player base damage
+    armor: number;        // Player armor
   }
   
   // Player Model Class with Methods
@@ -25,18 +33,30 @@ import { Item } from "../items/item";
     equippedItems: Item[];
     money: number;
     score: number;
+    damage: number;
+    armor: number;
   
     constructor(id: string, username: string) {
       this.id = id;
       this.username = username;
-      this.health = 100;     // default health
-      this.maxHealth = 100;  // default max health
-      this.level = 1;        // default level
-      this.experience = 0;   // default experience
-      this.inventory = [];   // empty inventory
-      this.equippedItems = []; // no items equipped initially
-      this.money = 0;
-      this.score = 0;
+      this.health = 100;        // default health
+      this.maxHealth = 100;     // default max health
+      this.level = 1;           // default level
+      this.experience = 0;      // default experience
+      this.inventory = [];      // empty inventory
+      this.equippedItems = [];  // no items equipped initially
+      this.money = 0;           // default money
+      this.score = 0;           // default score
+      this.damage = 5;          // base damage
+      this.armor = 0;           // default armor
+      this.addItem(woodenSword);
+      this.addItem(magic_wand);
+      this.addItem(bow_and_arrow);
+      this.addItem(steelArmor);
+      this.addItem(fireArmor);
+      this.addItem(woodenArmor);
+      this.equipItem(woodenSword);
+      this.equipItem(woodenArmor);
     }
   
     // Method to increase experience and level up
@@ -76,12 +96,19 @@ import { Item } from "../items/item";
   
     // Method to add an item to inventory
     addItem(item: Item) {
-      this.inventory.push(item);
+      if (!this.inventory.find(i => i.id === item.id)){
+        this.inventory.push(item);
+      }
     }
   
     // Method to equip an item
     equipItem(item: Item) {
       this.equippedItems.push(item);
+      if (item.type === 'armor'){
+        this.armor += parseInt(item.effect || '0', 10);
+      } else{
+        this.damage = parseInt(item.effect || '0', 10);
+      }
     }
   
     // Method to use an item (e.g., potion)
@@ -97,18 +124,15 @@ import { Item } from "../items/item";
     removeItem(item: Item) {
       this.inventory = this.inventory.filter(i => i.id !== item.id);
     }
-  
-    // Return player stats for display or debugging
-    getStats() {
-      return {
-        username: this.username,
-        health: this.health,
-        maxHealth: this.maxHealth,
-        level: this.level,
-        experience: this.experience,
-        inventory: this.inventory.map(i => i.name),
-        money: this.money,
-      };
+
+    // Method to unequip item 
+    unequipItem(item: Item) {
+      this.equippedItems = this.equippedItems.filter(i => i.id !== item.id);
+      if (item.type === 'armor'){
+        this.armor -= parseInt(item.effect || '0', 10);
+      } else{
+        this.damage = 5;
+      }
     }
   }
   

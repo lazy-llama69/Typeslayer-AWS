@@ -1,12 +1,12 @@
 // steelArmor.tsx
-import { Item } from './item';
+import { Item } from '../item';
 
 const steelArmor: Item = {
-  id: '3',
+  id: '2002',
   name: 'Steel Armor',
   type: 'armor',
   price: 50,
-  effect: 'deflect',
+  effect: '20',
   url: './assets/items/steel_armor.jpg',
 };
 

@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PlayerModel } from './models/playerModel';
 import { BossModel } from './models/bossModel'; 
-import { Button, Input, Flex, Heading, View, Breadcrumbs, ThemeProvider, createTheme, Menu, MenuItem, MenuButton, Radio, RadioGroupField, Divider, useTheme, } from '@aws-amplify/ui-react';
+import { Button, Input, Flex, Heading, View, Breadcrumbs, ThemeProvider, createTheme, Menu, MenuItem, MenuButton, Radio, RadioGroupField, Divider, } from '@aws-amplify/ui-react';
 import { IoIosHeart } from "react-icons/io";
 import { MdHeartBroken } from "react-icons/md";
 import { HiOutlineArrowSmallUp, HiOutlineArrowSmallDown, HiOutlineArrowSmallLeft, HiOutlineArrowSmallRight } from "react-icons/hi2";
 import wordDict from './assets/words_dictionary.json'; 
 import axios from 'axios';
 import { TraderModel } from './models/traderModel';
+import { GiPotionBall, GiCrossedSwords, GiShoulderArmor } from "react-icons/gi";
 
 
 const GamePlay = () => {
@@ -28,7 +29,10 @@ const GamePlay = () => {
   const [trader, setTrader] = useState<TraderModel | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
-  const { tokens } = useTheme();
+  const [selectedWeapon, setSelectedWeapon] = useState<string>("1001"); // Default value
+  const [selectedClothing, setSelectedClothing] = useState<string>('2001'); //Default value
+
+
 
   useEffect(() => {
     if (counterattackInProgress) {
@@ -236,7 +240,8 @@ const GamePlay = () => {
       setUserInput(''); // Clear the input after attack
       setBoss((prevBoss) => {
         if (!prevBoss) return null;
-        const updatedHealth = Math.max(0, prevBoss.health - 100);
+        const damageToBoss = player?.damage || 0;
+        const updatedHealth = Math.max(0, prevBoss.health - damageToBoss);
 
         //Picks a new random word
         pickRandomWord();
@@ -247,7 +252,7 @@ const GamePlay = () => {
         };
       });
 
-      // After each attack, there's a 100% chance to trigger the counterattack
+      // After each attack, there's a 50% chance to trigger the counterattack
       const randomChance = Math.random();
       if (randomChance < 0.5) {
         alert('The boss is counterattacking!');
@@ -369,6 +374,54 @@ const GamePlay = () => {
     },
   });
 
+  const handleEquipmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const item = player?.inventory.find(i => i.id === e.target.value);
+    var itemToUnequip;
+    if (e.target.value.charAt(0) === '1'){
+      itemToUnequip = player?.equippedItems.find(i => i.type === 'weapon');
+      setSelectedWeapon(e.target.value);
+    } else {
+      itemToUnequip = player?.equippedItems.find(i => i.type === 'armor');
+      setSelectedClothing(e.target.value);
+    }
+    if (itemToUnequip) {
+      // Unequip the currently equipped item
+      player?.unequipItem(itemToUnequip);
+    } 
+    if (item){
+      // Equip the new item
+      player?.equipItem(item);
+      console.log("successfully changed equipment");
+    } else {
+      // Handle case where the weapon was not found
+      console.error('Item not found for equip operation');
+    }
+
+  };
+
+  const debugButton = () => {
+    console.log(player?.inventory);
+    console.log(player?.equippedItems);
+    // console.log(player?.damage);
+    // console.log(boss?.health);
+    // player?.unequipItem(woodenSword);
+    // console.log(player?.equippedItems);
+    // console.log(player?.damage);
+    // console.log(selectedWeapon);
+
+    // add weapons
+    // player?.addItem(bow_and_arrow);
+    // player?.addItem(magic_wand);
+    // player?.addItem(woodenSword);
+
+
+    // remove weapons
+    // player?.removeItem(bow_and_arrow);
+    // player?.removeItem(magic_wand);
+    // player?.removeItem(woodenSword);
+
+  };
+
 
   return (
     
@@ -416,39 +469,43 @@ const GamePlay = () => {
         >
           <Divider orientation="horizontal" size='large' border="5px solid pink" borderRadius="10px" />
           <Flex direction="row" justifyContent="center">
-            <Heading level={3}><strong>Weapon</strong> </Heading>
+            <Heading level={3}><strong>Weapon</strong> <GiCrossedSwords></GiCrossedSwords></Heading>
           </Flex>
           <RadioGroupField
               legend="small"
               legendHidden
               name="weapon"
-              defaultValue="wooden_sword"
-            >
-              <Radio value="wooden_sword">Wooden Sword</Radio>
-              <Radio value="bow">Bow And Arrow</Radio>
-              <Radio value="magic_wand">Magic Wand</Radio>
+              value={selectedWeapon}
+              onChange={handleEquipmentChange} // Call handler on change
+            > 
+              <Radio value="1001">Wooden Sword</Radio>
+              <Radio value="1002">Bow And Arrow</Radio>
+              <Radio value="1003">Magic Wand</Radio>
             </RadioGroupField>
           
           <Divider orientation="horizontal" size='large' border="5px solid pink" borderRadius="10px" />
           <Flex direction="row" justifyContent="center">
-            <Heading level={3}><strong>Clothing</strong> </Heading>
+            <Heading level={3}><strong>Clothing</strong> <GiShoulderArmor></GiShoulderArmor> </Heading>
           </Flex>
           <RadioGroupField
             legend="small"
             legendHidden
             name="clothing"
-            defaultValue= "naked"
+            value={selectedClothing}
+            onChange={handleEquipmentChange} // Call handler on change
           >
-            <Radio value="naked">Naked</Radio>
-            <Radio value="steel_armor">Steel Armour</Radio>
-            <Radio value="fire_vest">Fireproof Vest</Radio>
+            <Radio value="2001">Wooden Armour</Radio>
+            <Radio value="2002">Steel Armour</Radio>
+            <Radio value="2003">Fireproof Vest</Radio>
           </RadioGroupField>
 
           <Divider orientation="horizontal" size='large' border="5px solid pink" borderRadius="10px" />
           <Flex direction="row" justifyContent="center">
-            <Heading level={3}><strong>Potions</strong> </Heading>
+            <Heading level={3}><strong>Potions</strong> <GiPotionBall></GiPotionBall> </Heading>
           </Flex>
-
+          <Flex direction="row" justifyContent="center" marginBottom="-1rem" marginTop="-1rem" >
+            <p> Remaining: 1</p>
+          </Flex>  
           <Button>
             Use Healing Potion
           </Button>
@@ -547,6 +604,7 @@ const GamePlay = () => {
             <Button variation="destructive" size="small" onClick={handleReturnToMenu}>
               Back to Main Menu
             </Button>
+            <Button onClick={debugButton}> Debug </Button>
       </Flex>
     </View>
   );

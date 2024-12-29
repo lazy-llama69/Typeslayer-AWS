@@ -1,8 +1,8 @@
 // healingPotion.tsx
-import { Item } from './item'; 
+import { Item } from '../item'; 
 
 const healingPotion: Item = {
-  id: '1',
+  id: '3001',
   name: 'Healing Potion',
   type: 'potion',
   price: 25,

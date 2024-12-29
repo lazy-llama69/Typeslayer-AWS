@@ -1,7 +1,7 @@
 import { PlayerModel } from "./playerModel";
-import healingPotion from '../items/healingPotion';
-import ironSword from '../items/woodenSword';
-import steelArmor from '../items/steelArmor';
+import healingPotion from '../items/potions/healingPotion';
+import ironSword from '../items/weapons/woodenSword';
+import steelArmor from '../items/armor/steelArmor';
 import { Item } from "../items/item";
   
   // Trader Model Class
