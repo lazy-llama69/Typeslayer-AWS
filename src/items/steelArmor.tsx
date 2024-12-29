@@ -7,6 +7,7 @@ const steelArmor: Item = {
   type: 'armor',
   price: 50,
   effect: 'deflect',
+  url: './assets/items/steel_armor.jpg',
 };
 
 export default steelArmor;

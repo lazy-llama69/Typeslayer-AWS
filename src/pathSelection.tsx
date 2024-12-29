@@ -2,9 +2,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Collection, Card, Image, View, Flex, Badge, Divider, Heading, Breadcrumbs, ThemeProvider, createTheme  } from '@aws-amplify/ui-react';
-import forestCabin from './assets/forest_cabin.jpg';
-import ybr from './assets/yellowbrickroad.jpg';
-import shop from './assets/shop.jpg';
+import forestCabin from './assets/paths/forest_cabin.jpg';
+import ybr from './assets/paths/yellowbrickroad.jpg';
+import shop from './assets/paths/shop.jpg';
 
 
 

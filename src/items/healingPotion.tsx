@@ -7,6 +7,8 @@ const healingPotion: Item = {
   type: 'potion',
   price: 25,
   effect: 'heal',  
+  url: './assets/items/healing_potion.jpg',
+
 };
 
 export default healingPotion;

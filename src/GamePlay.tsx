@@ -9,6 +9,7 @@ import { HiOutlineArrowSmallUp, HiOutlineArrowSmallDown, HiOutlineArrowSmallLeft
 import wordDict from './assets/words_dictionary.json'; 
 import axios from 'axios';
 import { TraderModel } from './models/traderModel';
+import { Menu, MenuItem } from '@aws-amplify/ui-react';
 
 
 const GamePlay = () => {
@@ -26,6 +27,7 @@ const GamePlay = () => {
   const navigate = useNavigate();
   const [breadcrumbs, setBreadcrumbs] = useState<string[]>(['Start']);
   const [trader, setTrader] = useState<TraderModel | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     if (counterattackInProgress) {
@@ -96,6 +98,12 @@ const GamePlay = () => {
     loadPlayerData();
   }, []);
 
+  const handleMenuOpenChange = (open: boolean) => {
+    setIsMenuOpen(open);
+  };
+
+  const closeMenu = () => setIsMenuOpen(false);
+
   const savePlayerData = () => {
     if (player) {
       localStorage.setItem('playerScore', JSON.stringify(player.score));
@@ -119,7 +127,7 @@ const GamePlay = () => {
       });
     } else {
       // If no data is found, you could reset to default values (e.g., score 0, money 0)
-      setPlayer(new PlayerModel('1', 'defaultUsername'));  // Default player creation
+      setPlayer(new PlayerModel('1', avatarName!));  // Default player creation
     }
 
     const savedBreadcrumbs = localStorage.getItem('breadcrumbs');
@@ -360,6 +368,38 @@ const GamePlay = () => {
   return (
     
     <View padding="2rem">
+      {/* Add the Menu Component */}
+      <Menu
+        isOpen={isMenuOpen}
+        onOpenChange={handleMenuOpenChange}
+        width="3rem"
+        maxWidth="4rem"
+      >
+        <MenuItem
+          onClick={() => {
+            closeMenu();
+            alert('Resume Game');
+          }}
+        >
+          Resume Game
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            closeMenu();
+            alert('Settings');
+          }}
+        >
+          Settings
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            closeMenu();
+            handleReturnToMenu();
+          }}
+        >
+          Exit to Main Menu
+        </MenuItem>
+      </Menu>
       {/* Breadcrumbs Component */}
       <ThemeProvider theme={theme}>
             <Breadcrumbs.Container borderRadius="medium" padding="medium">
@@ -380,60 +420,69 @@ const GamePlay = () => {
                 ))}
             </Breadcrumbs.Container>
       </ThemeProvider>
-      <Flex direction="column" gap="1rem" alignItems="center">
-        {!player ? (
-          <p>Loading player...</p>
-        ) : (
-          <>
-            <Heading level={1}>Battle!</Heading>
-            <Heading level={2}>Player: {player.username}</Heading>
-            <Flex direction="row" gap="0.5rem" justifyContent="center" alignItems="center">
-              {renderHearts(player.health, player.maxHealth)}
-            </Flex>
-            <p>Level: {player.level}</p>
+      <Flex direction="column" alignItems="center">
+  {!player ? (
+    <p>Loading player...</p>
+  ) : (
+    <>
+      <Heading level={1}>Battle!</Heading>
+      <Flex direction="row" justifyContent="space-between" alignItems="flex-start" width="100%" gap="10rem">
+        {/* Player Section */}
+        <Flex direction="column" alignItems="center" gap="0.5rem">
+          <Heading level={2}>Player:</Heading>
+          <Heading level={2}> {player.username}</Heading>
+          <Flex direction="row" gap="0.5rem" wrap="wrap" maxWidth="315px" justifyContent="center">
+            {renderHearts(player.health, player.maxHealth)}
+          </Flex>
+          <p>Level: {player.level}</p>
+        </Flex>
 
-            {boss && (
-              <>
-                <Heading level={2}>Boss: {boss.name}</Heading>
-                <p>Health: {boss.health}/{boss.maxHealth}</p>
-                <Flex direction="row" gap="0.5rem" justifyContent="center" alignItems="center">
-                  {renderHearts(boss.health, boss.maxHealth)}
-                </Flex>
-              </>
-            )}
-            <Flex direction="row" gap="0.5rem" justifyContent="center" alignItems="center">
-            <p>Input the following word to attack:</p>
-            <strong>{currentWord}</strong>
+        {/* Boss Section */}
+        {boss && (
+          <Flex direction="column" alignItems="center" gap="0.5rem">
+            <Heading level={2}>Boss: </Heading>
+            <Heading level={2}> {boss.name}</Heading>
+            <Flex direction="row" gap="0.5rem" wrap="wrap" maxWidth="315px" justifyContent="center">
+              {renderHearts(boss.health, boss.maxHealth)}
             </Flex>
-            <Flex direction="row" gap="0.5rem" justifyContent="center" alignItems="center">
-              <Input
-                placeholder={`Type the word`}
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleAttack(); // Trigger attack on Enter key press
-                  }
-                }}
-              />
-            </Flex>
-
-            {/* Display the dodge sequence */}
-            {isDodging && (
-              <div>
-                <p>Follow the sequence to dodge:</p>
-                <Flex direction="row" gap="1rem" justifyContent="center">
-                  {renderDodgeSequence()}
-                </Flex>
-                <p>Time left to dodge: {timeLeft} seconds</p>
-              </div>
-            )}
-          </>
+          </Flex>
         )}
+      </Flex>
+
+      {/* Word Input and Attack Section */}
+      <Flex direction="column" gap="0.5rem" alignItems="center">
+        <p>Input the following word to attack:</p>
+        <strong>{currentWord}</strong>
+        <Flex direction="row" gap="0.5rem" justifyContent="center" alignItems="center">
+          <Input
+            placeholder={`Type the word`}
+            value={userInput}
+            onChange={(e) => setUserInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleAttack(); // Trigger attack on Enter key press
+              }
+            }}
+          />
+        </Flex>
+      </Flex>
+
+      {/* Display the dodge sequence */}
+      {isDodging && (
+        <div>
+          <p>Follow the sequence to dodge:</p>
+          <Flex direction="row" gap="1rem" justifyContent="center">
+            {renderDodgeSequence()}
+          </Flex>
+          <p>Time left to dodge: {timeLeft} seconds</p>
+        </div>
+      )}
+    </>
+      )}
       <Button variation="primary" size="small" onClick={handleReturnToMenu}>
         Back to Main Menu
       </Button>
-      </Flex>
+    </Flex>
     </View>
   );
 };
