@@ -7,7 +7,7 @@ const magic_wand: Item = {
   type: 'weapon',
   price: 100,
   effect: '90',
-  url: './assets/items/magic_wand.jpg',
+  url: '/assets/items/magic_wand.jpg',
   count: 0,
 };
 

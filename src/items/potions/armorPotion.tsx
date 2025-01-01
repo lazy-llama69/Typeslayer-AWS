@@ -7,7 +7,7 @@ const armorPotion: Item = {
   type: 'potion',
   price: 25,
   effect: 'armor',  
-  url: './assets/items/armor_potion.jpg',
+  url: '/assets/items/armor_potion.jpg',
   count: 0,
 
 };

@@ -7,7 +7,7 @@ const woodenSword: Item = {
   type: 'weapon',
   price: 10,
   effect: '50',
-  url: './assets/items/wooden_sword.jpg',
+  url: '/assets/items/wooden_sword.jpg',
   count: 0,
 };
 

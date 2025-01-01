@@ -32,19 +32,12 @@ import { Item } from "../items/item";
         // Deduct money from the player and add item to inventory
         player.addItem(itemToTrade);
         console.log(`Successfully purchased: ${itemToTrade.name}`);
+        console.log(player.inventory);
         return true;
       } else {
         console.log('Not enough money to purchase this item.');
         return false;
       }
-    }
-  
-    // Show available items for trade
-    showItemsForSale() {
-      console.log('Items available for trade:');
-      this.itemsForSale.forEach(item => {
-        console.log(`${item.name} - Price: ${item.price}`);
-      });
     }
   }
   

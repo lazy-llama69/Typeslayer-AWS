@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Input, View, Flex,  Heading } from '@aws-amplify/ui-react';
+import { PlayerModel } from './models/playerModel';
 
 const nameCreation = () => {
     const navigate = useNavigate();
@@ -13,14 +14,24 @@ const nameCreation = () => {
         navigate('/');
     };
 
+    const handleCreatePlayer = () => {
+        const newPlayer = new PlayerModel('1', avatarName!);
+
+        // Save player to local storage
+        localStorage.setItem('playerData', JSON.stringify(newPlayer));
+
+        // Pass the avatar name and selected path to the GamePlay component 
+        navigate(`/pathselection/${defeatedBossCount}`);
+      };
+
     // Handle name submission and path selection
     const handleStartGame = () => {
         if (!avatarName.trim()) {
             alert('Please enter your avatar name.');
             return;
         }
-        // Pass the avatar name and selected path to the GamePlay component
-        navigate(`/pathselection/${avatarName}/${defeatedBossCount}`);
+        handleCreatePlayer();
+        
     };
 
     return (

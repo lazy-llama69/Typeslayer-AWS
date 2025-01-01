@@ -7,7 +7,7 @@ const bow_and_arrow: Item = {
   type: 'weapon',
   price: 10,
   effect: '70',
-  url: './assets/items/bow.jpg',
+  url: '/assets/items/bow.jpg',
   count: 0,
 };
 

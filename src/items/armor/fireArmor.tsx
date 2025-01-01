@@ -7,7 +7,7 @@ const fireArmor: Item = {
   type: 'armor',
   price: 150,
   effect: '40',
-  url: './assets/items/fire_armor.jpg',
+  url: '/assets/items/fire_armor.jpg',
   count: 0,
 };
 

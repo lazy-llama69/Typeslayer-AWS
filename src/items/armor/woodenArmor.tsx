@@ -3,11 +3,11 @@ import { Item } from '../item';
 
 const woodenArmor: Item = {
   id: '2001',
-  name: 'Steel Armor',
+  name: 'Wooden Armor',
   type: 'armor',
   price: 50,
   effect: '10',
-  url: './assets/items/wooden_armor.jpg',
+  url: '/assets/items/wooden_armor.jpg',
   count: 0,
 };
 

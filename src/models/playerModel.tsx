@@ -46,7 +46,7 @@ import healingPotion from "../items/potions/healingPotion";
       this.experience = 0;      // default experience
       this.inventory = [];      // empty inventory
       this.equippedItems = [];  // no items equipped initially
-      this.money = 0;           // default money
+      this.money = 100000;           // default money
       this.score = 0;           // default score
       this.damage = 5;          // base damage
       this.armor = 0;           // default armor

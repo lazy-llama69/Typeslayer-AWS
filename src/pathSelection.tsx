@@ -2,9 +2,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Collection, Card, Image, View, Flex, Badge, Divider, Heading, Breadcrumbs, ThemeProvider, createTheme  } from '@aws-amplify/ui-react';
-import forestCabin from './assets/paths/forest_cabin.jpg';
-import ybr from './assets/paths/yellowbrickroad.jpg';
-import shop from './assets/paths/shop.jpg';
+import forestCabin from '/assets/paths/forest_cabin.jpg';
+import ybr from '/assets/paths/yellowbrickroad.jpg';
+import shop from '/assets/paths/shop.jpg';
 
 
 
@@ -19,34 +19,41 @@ interface PathItem {
 
 const PathSelection = () => {
     const navigate = useNavigate();
-    const { avatarName, defeatedBossCount } = useParams();
+    const { defeatedBossCount } = useParams();
     const [selectedPath, setSelectedPath] = useState<number | null>(null);
     const [breadcrumbs, setBreadcrumbs] = useState<string[]>(['Start']);
-
+    const shopAppears = Math.random() < 1; // 100% chance for the Shop to appear
+    const [randomLocation, setRandomLocation] = useState<PathItem[]>([]); // Use state for locations
     // Handle return to menu
     const handleReturnToMenu = () => {
         localStorage.clear();
         navigate('/');
     };
     // Define the paths
-    const items: PathItem[] = [
+    const locations: PathItem[] = [
         {
-        title: 'The Dark Forest',
-        badges: ['Easy', 'Poison'],
-        imageUrl: forestCabin,
-        pathId: 1,
+            title: 'The Dark Forest',
+            badges: ['Easy', 'Poison'],
+            imageUrl: forestCabin,
+            pathId: 1,
         },
         {
-        title: 'Yellow Brick Road',
-        badges: ['Hard', 'Heal'],
-        imageUrl: ybr,
-        pathId: 2,
+            title: 'Yellow Brick Road',
+            badges: ['Hard', 'Heal'],
+            imageUrl: ybr,
+            pathId: 2,
         },
         {
-        title: 'The Haunted Castle',
-        badges: ['Medium', 'Fire'],
-        imageUrl: shop,
-        pathId: 3,
+            title: 'The Haunted Castle',
+            badges: ['Medium', 'Fire'],
+            imageUrl: shop,
+            pathId: 3,
+        },
+        {
+            title: 'Shop',
+            badges: ['Shop'],
+            imageUrl: shop,
+            pathId: 4,
         },
     ];
 
@@ -55,6 +62,8 @@ const PathSelection = () => {
         if (savedBreadcrumbs) {
             setBreadcrumbs(JSON.parse(savedBreadcrumbs));
         }
+        // Generate random locations
+        setRandomLocation(getRandomLocations());
     }, []);
 
     // Handle name submission and path selection
@@ -63,18 +72,20 @@ const PathSelection = () => {
             alert('Please select a path.');
             return;
         }
-
-        const selectedPathTitle = items.find((item) => item.pathId === selectedPath)?.title || '';
+        const selectedPathTitle = locations.find((item) => item.pathId === selectedPath)?.title || '';
         setBreadcrumbs((prev) => {
             const updatedBreadcrumbs = [...prev, selectedPathTitle];
             // Store updated breadcrumbs in localStorage
             localStorage.setItem('breadcrumbs', JSON.stringify(updatedBreadcrumbs));
             return updatedBreadcrumbs;
         });
-
-
+        
+        if (selectedPathTitle === "Shop"){
+            navigate(`/trading/${selectedPath}/${defeatedBossCount}`);
+            return;
+        }
         // Pass the avatar name and selected path to the GamePlay component
-        navigate(`/gameplay/${avatarName}/${selectedPath}/${defeatedBossCount}`);
+        navigate(`/gameplay/${selectedPath}/${defeatedBossCount}`);
     };
 
     const theme = createTheme({
@@ -95,6 +106,15 @@ const PathSelection = () => {
         },
       });
 
+    // Function to get 3 random locations, with a 25% chance for the Shop to appear
+    const getRandomLocations = (): PathItem[] => {
+        const availableLocations = shopAppears ? locations : locations.filter(loc => loc.pathId !== 4);
+
+        // Shuffle the available locations and select the first 3
+        const shuffled = availableLocations.sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, 3);
+    };
+
     return (
     <View padding="2rem">
         {/* Breadcrumbs Component */}
@@ -107,7 +127,7 @@ const PathSelection = () => {
                             isCurrent={idx === breadcrumbs.length - 1}
                             style={{
                                 fontWeight: 'bold',
-                                textDecoration: 'underline',
+                                
                             }}
                         >
                             {text}
@@ -125,7 +145,8 @@ const PathSelection = () => {
             Bosses Defeated: {defeatedBossCount}
 
             </p>
-            <Collection items={items} type="list" direction="row" gap="20px" wrap="nowrap">
+
+            <Collection items={randomLocation} type="list" direction="row" gap="20px" wrap="nowrap">
                 {(item, index) => (
                 <Card
                     key={index}
@@ -155,6 +176,8 @@ const PathSelection = () => {
                                 ? 'blue.40'
                                 : badge === 'Poison'
                                 ? 'purple.40'
+                                : badge === 'Shop' 
+                                ? 'yellow.40'
                                 : 'orange.40'
                             }
                         >
@@ -175,7 +198,7 @@ const PathSelection = () => {
             variation="primary"
             size="large"
             onClick={handleStartGame}
-            isDisabled={!avatarName || selectedPath === null}
+            isDisabled={selectedPath === null}
             style={{ marginTop: '1rem' }}
             onKeyDown={(e) => {
                 if (e.key === 'Enter') {

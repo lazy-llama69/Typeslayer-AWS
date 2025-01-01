@@ -7,7 +7,7 @@ const steelArmor: Item = {
   type: 'armor',
   price: 50,
   effect: '20',
-  url: './assets/items/steel_armor.jpg',
+  url: '/assets/items/steel_armor.png',
   count: 0,
 };
 

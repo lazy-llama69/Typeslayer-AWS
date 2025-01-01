@@ -8,14 +8,13 @@ import { MdHeartBroken } from "react-icons/md";
 import { HiOutlineArrowSmallUp, HiOutlineArrowSmallDown, HiOutlineArrowSmallLeft, HiOutlineArrowSmallRight } from "react-icons/hi2";
 import wordDict from './assets/words_dictionary.json'; 
 import axios from 'axios';
-import { TraderModel } from './models/traderModel';
 import { GiPotionBall, GiCrossedSwords, GiShoulderArmor } from "react-icons/gi";
-import wicked from './assets/entities/wicked_witch.jpg';
-import protagonist from './assets/entities/protagonist.jpg';
+import wicked from '/assets/entities/wicked_witch.jpg';
+import protagonist from '/assets/entities/protagonist.jpg';
 import { Item } from './items/item';
 
 const GamePlay = () => {
-  const { avatarName, pathId, defeatedBossCount: totalDefeatedBossCount } = useParams();
+  const {  pathId, defeatedBossCount: totalDefeatedBossCount } = useParams();
   const [player, setPlayer] = useState<PlayerModel | null>(null);
   const [boss, setBoss] = useState<BossModel | null>(null); // Boss state
   const [userInput, setUserInput] = useState(''); // User's input
@@ -25,15 +24,14 @@ const GamePlay = () => {
   const [counterattackInProgress, setCounterattackInProgress] = useState(false); // Track if counterattack is happening
   const [currentWord, setCurrentWord] = useState('');
   const [defeatedBossCount, setDefeatedBossCount] = useState<number>(parseInt(totalDefeatedBossCount || '0', 10)); // Track number of defeated bosses
-  const [playerCreated, setPlayerCreated] = useState(false);
   const navigate = useNavigate();
   const [breadcrumbs, setBreadcrumbs] = useState<string[]>(['Start']);
-  const [trader, setTrader] = useState<TraderModel | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
-  const [selectedWeapon, setSelectedWeapon] = useState<string>("1001"); // Default value
-  const [selectedClothing, setSelectedClothing] = useState<string>('2001'); //Default value
-  const [selectedPotion, setSelectedPotion] = useState<string>('3001'); //Default value
+  const [selectedWeapon, setSelectedWeapon] = useState<string | null>("1001"); // Default value
+  const [selectedClothing, setSelectedClothing] = useState<string | null>('2001'); //Default value
+  const [selectedPotion, setSelectedPotion] = useState<string | null>('3001'); //Default value
+  const [isInitialized, setIsInitialized] = useState(false);   
 
 
 
@@ -87,14 +85,6 @@ const GamePlay = () => {
     }
   }, [player]);
 
-  // Create player and boss when the game starts
-  useEffect(() => {
-    if (avatarName && !playerCreated) {
-      handleCreatePlayer();
-    }
-  }, [avatarName, playerCreated]);
-  
-
   useEffect(() => {
     // Check if the boss is defeated after state change
     if (boss && boss.health <= 0) {
@@ -103,8 +93,17 @@ const GamePlay = () => {
   }, [boss]); // This effect runs when `boss` state changes
 
   useEffect(() => {
-    loadPlayerData();
-  }, []);
+    loadPlayerData(); 
+  }, []); //This effect loads the player data
+
+  useEffect(() => {
+    // Only create the boss if not already initialized
+    if (player && !isInitialized) {
+      handCreateBoss();
+      setIsInitialized(true);
+    }
+  }, [player, isInitialized]); //This effect starts the game
+
 
   const handleMenuOpenChange = (open: boolean) => {
     setIsMenuOpen(open);
@@ -118,46 +117,25 @@ const GamePlay = () => {
 
   const savePlayerData = () => {
     if (player) {
-      localStorage.setItem('playerScore', JSON.stringify(player.score));
-      localStorage.setItem('playerMoney', JSON.stringify(player.money));
+      localStorage.setItem('playerData', JSON.stringify(player));
     }
   };
 
   const loadPlayerData = () => {
-    const storedScore = localStorage.getItem('playerScore');
-    const storedMoney = localStorage.getItem('playerMoney');
-  
-    if (storedScore && storedMoney) {
-      setPlayer((prevPlayer) => {
-        // Check if prevPlayer is null and create a new player if it is
-        return {
-          ...prevPlayer,  // If prevPlayer exists, spread its properties
-          score: JSON.parse(storedScore),  // Update score
-          money: JSON.parse(storedMoney),  // Update money
-          // Add any other necessary properties to ensure PlayerModel is complete
-        } as PlayerModel;
-      });
+    const storedPlayerData = localStorage.getItem('playerData');
+
+    if (storedPlayerData) {
+      const parsedPlayer = JSON.parse(storedPlayerData);
+      const reconstructedPlayer = Object.assign(new PlayerModel(parsedPlayer.id,parsedPlayer.username), parsedPlayer);
+      setPlayer(reconstructedPlayer);  // Set the player with the data from localStorage
     } else {
-      // If no data is found, you could reset to default values (e.g., score 0, money 0)
-      setPlayer(new PlayerModel('1', avatarName!));  // Default player creation
+      navigate('/');  // Redirect to the name creation screen if player data is not found
     }
 
     const savedBreadcrumbs = localStorage.getItem('breadcrumbs');
     if (savedBreadcrumbs) {
         setBreadcrumbs(JSON.parse(savedBreadcrumbs));
     }
-  };
-  
-  const handleCreatePlayer = () => {
-    if (playerCreated || player) return;
-
-    const newPlayer = new PlayerModel('1', avatarName!);
-    const newTrader = new TraderModel();
-    setTrader(newTrader);
-    setPlayer(newPlayer);
-    setPlayerCreated(true);
-    handCreateBoss();
-    setDefeatedBossCount(defeatedBossCount);
   };
 
   const bosses = {
@@ -167,6 +145,7 @@ const GamePlay = () => {
   };
 
   const handCreateBoss = () => {
+    if (!player) return;  // Ensure player is loaded before creating the boss
       const [name, health, attack, reward] = bosses[pathId] || ['ERROR 404', 450, 55, 250];
       const newBoss = new BossModel(name, health, attack, reward);
       setBoss(newBoss);
@@ -185,8 +164,8 @@ const GamePlay = () => {
       player.score += boss.score;
       savePlayerData(); // Save updated player data after defeating the boss
       alert('You have defeated the boss');
-      console.log("This is the players money",player?.money);
-      console.log('This is the defeated boss count', defeatedBossCount+1);
+      // console.log("This is the players money",player?.money);
+      // console.log('This is the defeated boss count', defeatedBossCount+1);
     }
     if (defeatedBossCount+1 === 2) {  
       // After the second boss is defeated, end the game
@@ -195,7 +174,7 @@ const GamePlay = () => {
     } else {
       // Continues the journey and lets the player choose a new path
       setDefeatedBossCount((prevCount) => prevCount + 1);
-      navigate(`/pathselection/${avatarName}/${defeatedBossCount+1}`); 
+      navigate(`/pathselection/${defeatedBossCount+1}`); 
       
     }
   };
@@ -440,6 +419,7 @@ const GamePlay = () => {
     // Remove the potion from the inventory after use
     player.removeItem(potion);
 
+    // Initiate a chance for boss to counterattack 
     const randomChance = Math.random();
     if (randomChance < 0.25) {
       alert('The boss is counterattacking!');
@@ -448,8 +428,10 @@ const GamePlay = () => {
   }
 
   const debugButton = () => {
+    console.log(player);
     console.log(player?.inventory);
     console.log(player?.equippedItems);
+    // console.log(player instanceof PlayerModel); // Should return true
     // console.log(player?.damage);
     // console.log(boss?.health);
     // player?.unequipItem(woodenSword);
@@ -508,10 +490,10 @@ const GamePlay = () => {
       </View>
 
       {/* Inventory menu button*/}
-      <View position="absolute" top="0" left="5rem" padding="1rem"> 
-        <Menu isOpen={isInventoryOpen} onOpenChange={handleInventoryOpenChange} width="15rem" size="large" backgroundColor="#bea9df"
+      <View position="absolute" top="10rem" left="10rem" > 
+        <Menu isOpen={isInventoryOpen} onOpenChange={handleInventoryOpenChange} width="18rem" size="large" backgroundColor="#bea9df"
           trigger={
-          <MenuButton variation="primary" size="large" width="105rem" backgroundColor="#808080">
+          <MenuButton variation="primary"width="100%" height="5rem" borderRadius ="2rem"backgroundColor="#808080">
             Inventory
           </MenuButton>
           }
@@ -524,7 +506,7 @@ const GamePlay = () => {
               legend="small"
               legendHidden
               name="weapon"
-              value={selectedWeapon}
+              value={selectedWeapon || 'invalid'}
               onChange={handleEquipmentChange} // Call handler on change
             > 
               <Radio value="1001">Wooden Sword</Radio>
@@ -532,7 +514,7 @@ const GamePlay = () => {
               <Radio value="1003">Magic Wand</Radio>
             </RadioGroupField>
           
-          <Divider orientation="horizontal" size='large' border="5px solid pink" borderRadius="10px" />
+          <Divider orientation="horizontal" size='large' border="5px solid pink" borderRadius="1px" />
           <Flex direction="row" justifyContent="center">
             <Heading level={3}><strong>Clothing</strong> <GiShoulderArmor></GiShoulderArmor> </Heading>
           </Flex>
@@ -540,7 +522,7 @@ const GamePlay = () => {
             legend="small"
             legendHidden
             name="clothing"
-            value={selectedClothing}
+            value={selectedClothing || "invalid"}
             onChange={handleEquipmentChange} // Call handler on change
           >
             <Radio value="2001">Wooden Armour</Radio>
@@ -548,7 +530,7 @@ const GamePlay = () => {
             <Radio value="2003">Fireproof Vest</Radio>
           </RadioGroupField>
 
-          <Divider orientation="horizontal" size='large' border="5px solid pink" borderRadius="10px" />
+          <Divider orientation="horizontal" size='large' border="5px solid pink" borderRadius="1px" />
           <Flex direction="row" justifyContent="center">
             <Heading level={3}><strong>Potions</strong> <GiPotionBall></GiPotionBall> </Heading>
           </Flex>
@@ -556,7 +538,7 @@ const GamePlay = () => {
             legend="small"
             legendHidden
             name="potions"
-            value={selectedPotion}
+            value={selectedPotion || "invalid"}
             onChange={handlePotionChosen} // Call handler on change
           >
             <Radio value="3001">Healing Potion</Radio>
@@ -578,7 +560,7 @@ const GamePlay = () => {
             Use {player?.inventory.find((item) => item.id === selectedPotion)?.name}
           </Button>
 
-          <Divider orientation="horizontal" size='large' border="5px solid pink" borderRadius="10px" />
+          <Divider orientation="horizontal" size='large' border="5px solid pink" borderRadius="10px"/>
         </Menu>
       </View>
 
@@ -623,7 +605,7 @@ const GamePlay = () => {
                 <img
                   src={protagonist} // Adjust the path as needed
                   alt={`${player.username}`}
-                  style={{ width: '300px', height: '200px', objectFit: 'cover', borderRadius: '8px' }}
+                  style={{ width: '300px', height: '300px', objectFit: 'cover', borderRadius: '8px' }}
                 />
                 <Flex direction="row" gap="0.5rem" wrap="wrap" maxWidth="315px" justifyContent="center">
                   {renderHearts(player.health, player.maxHealth)}
@@ -639,7 +621,7 @@ const GamePlay = () => {
                   <img
                     src={(wicked)} 
                     alt={`${boss.name}`}
-                    style={{ width: '300px', height: '200px', objectFit: 'cover', borderRadius: '8px' }}
+                    style={{ width: '300px', height: '300px', objectFit: 'cover', borderRadius: '8px' }}
                   />
                   <Flex direction="row" gap="0.5rem" wrap="wrap" maxWidth="315px" justifyContent="center">
                     {renderHearts(boss.health, boss.maxHealth)}
