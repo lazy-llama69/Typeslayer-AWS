@@ -6,4 +6,5 @@ export interface Item {
     price: number;  // Price of the item for trading
     effect?: string;  // Optional effect, used for potions
     url: string;  // path to image 
+    count: number; // number of the item in player inventory
 }

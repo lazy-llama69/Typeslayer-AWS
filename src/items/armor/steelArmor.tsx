@@ -8,6 +8,7 @@ const steelArmor: Item = {
   price: 50,
   effect: '20',
   url: './assets/items/steel_armor.jpg',
+  count: 0,
 };
 
 export default steelArmor;

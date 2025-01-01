@@ -8,6 +8,7 @@ const healingPotion: Item = {
   price: 25,
   effect: 'heal',  
   url: './assets/items/healing_potion.jpg',
+  count: 0,
 
 };
 

@@ -8,6 +8,7 @@ const fireArmor: Item = {
   price: 150,
   effect: '40',
   url: './assets/items/fire_armor.jpg',
+  count: 0,
 };
 
 export default fireArmor;

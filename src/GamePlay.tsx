@@ -10,8 +10,9 @@ import wordDict from './assets/words_dictionary.json';
 import axios from 'axios';
 import { TraderModel } from './models/traderModel';
 import { GiPotionBall, GiCrossedSwords, GiShoulderArmor } from "react-icons/gi";
-import wicked from './assets/bosses/wicked_witch.jpg';
-import protagonist from './assets/bosses/protagonist.jpg';
+import wicked from './assets/entities/wicked_witch.jpg';
+import protagonist from './assets/entities/protagonist.jpg';
+import { Item } from './items/item';
 
 const GamePlay = () => {
   const { avatarName, pathId, defeatedBossCount: totalDefeatedBossCount } = useParams();
@@ -32,6 +33,7 @@ const GamePlay = () => {
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
   const [selectedWeapon, setSelectedWeapon] = useState<string>("1001"); // Default value
   const [selectedClothing, setSelectedClothing] = useState<string>('2001'); //Default value
+  const [selectedPotion, setSelectedPotion] = useState<string>('3001'); //Default value
 
 
 
@@ -400,6 +402,51 @@ const GamePlay = () => {
 
   };
 
+  const handlePotionChosen = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedPotion(e.target.value); // Update selected potion ID
+  };
+
+  const handlePotionEffect = () => {
+    
+    // Find the potion in the player's inventory
+    const potion = player?.inventory.find((i) => i.id === selectedPotion);
+    if (!potion || !player) {
+      alert("Selected potion not found in inventory.");
+      return;
+    }
+  
+    // Apply potion effects based on the item's effect type
+    switch (potion.effect) {
+      case "heal":
+        player?.heal(50);
+        alert(`You used a Healing Potion! Restored 50 health.`);
+        break;
+  
+      case "attack":
+        player.damage += 20;
+        alert(`You used an Attack Boost Potion! Attack increased by 20.`);
+        break;
+  
+      case "armor":
+        player.armor += 20;
+        alert(`You used an Armor Boost Potion! Armor increased by 20.`);
+        break;
+  
+      default:
+        alert("Unknown potion effect.");
+        return;
+    }
+  
+    // Remove the potion from the inventory after use
+    player.removeItem(potion);
+
+    const randomChance = Math.random();
+    if (randomChance < 0.25) {
+      alert('The boss is counterattacking!');
+      setCounterattackInProgress(true); // Trigger counterattack
+    }
+  }
+
   const debugButton = () => {
     console.log(player?.inventory);
     console.log(player?.equippedItems);
@@ -505,11 +552,30 @@ const GamePlay = () => {
           <Flex direction="row" justifyContent="center">
             <Heading level={3}><strong>Potions</strong> <GiPotionBall></GiPotionBall> </Heading>
           </Flex>
+          <RadioGroupField
+            legend="small"
+            legendHidden
+            name="potions"
+            value={selectedPotion}
+            onChange={handlePotionChosen} // Call handler on change
+          >
+            <Radio value="3001">Healing Potion</Radio>
+            <Radio value="3002">Attack Potion</Radio>
+            <Radio value="3003">Armor Potion</Radio>
+          </RadioGroupField>
           <Flex direction="row" justifyContent="center" marginBottom="-1rem" marginTop="-1rem" >
-            <p> Remaining: 1</p>
+          <p>
+            Remaining:{" "}
+            {selectedPotion
+            ? player?.inventory.find((i) => i.id === selectedPotion)?.count || 0
+            : 0}
+          </p>
           </Flex>  
-          <Button>
-            Use Healing Potion
+          <Button 
+          onClick={handlePotionEffect} 
+          isDisabled={!player?.inventory.some((item) => item.id === selectedPotion)}
+          >
+            Use {player?.inventory.find((item) => item.id === selectedPotion)?.name}
           </Button>
 
           <Divider orientation="horizontal" size='large' border="5px solid pink" borderRadius="10px" />
@@ -613,10 +679,7 @@ const GamePlay = () => {
             )}
           </>
             )}
-            <Button variation="destructive" size="small" onClick={handleReturnToMenu}>
-              Back to Main Menu
-            </Button>
-            <Button onClick={debugButton}> Debug </Button>
+            <Button variation = 'primary' onClick={debugButton}> Debug </Button>
       </Flex>
     </View>
   );

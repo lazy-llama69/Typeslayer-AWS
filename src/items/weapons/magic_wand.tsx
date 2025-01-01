@@ -8,6 +8,7 @@ const magic_wand: Item = {
   price: 100,
   effect: '90',
   url: './assets/items/magic_wand.jpg',
+  count: 0,
 };
 
 export default magic_wand;

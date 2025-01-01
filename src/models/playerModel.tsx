@@ -5,6 +5,7 @@ import steelArmor from "../items/armor/steelArmor";
 import fireArmor from "../items/armor/fireArmor";
 import woodenSword from "../items/weapons/woodenSword";
 import woodenArmor from "../items/armor/woodenArmor";
+import healingPotion from "../items/potions/healingPotion";
   
   export interface Player {
     id: string;            // Unique identifier for the player (could be userId from Cognito)
@@ -57,6 +58,8 @@ import woodenArmor from "../items/armor/woodenArmor";
       this.addItem(woodenArmor);
       this.equipItem(woodenSword);
       this.equipItem(woodenArmor);
+      this.addItem(healingPotion);
+      this.addItem(healingPotion);
     }
   
     // Method to increase experience and level up
@@ -96,8 +99,16 @@ import woodenArmor from "../items/armor/woodenArmor";
   
     // Method to add an item to inventory
     addItem(item: Item) {
-      if (!this.inventory.find(i => i.id === item.id)){
-        this.inventory.push(item);
+      // Check if item exists in the inventory
+      const existingItem = this.inventory.find(i => i.id === item.id);
+
+      if (!existingItem) {
+        // If item doesn't exist, add it to the inventory
+        const newItem = { ...item, count: 1 }; // Clone and initialize count
+        this.inventory.push(newItem);
+      } else {
+        // If item exists, update the count 
+        existingItem.count += 1;
       }
     }
   
@@ -122,7 +133,13 @@ import woodenArmor from "../items/armor/woodenArmor";
   
     // Method to remove an item from inventory
     removeItem(item: Item) {
-      this.inventory = this.inventory.filter(i => i.id !== item.id);
+      const existingItem = this.inventory.find(i => i.id === item.id);
+      if (existingItem){
+        existingItem.count -= 1;
+        if (existingItem.count === 0){
+          this.inventory = this.inventory.filter(i => i.id !== item.id);
+        }
+      }
     }
 
     // Method to unequip item 

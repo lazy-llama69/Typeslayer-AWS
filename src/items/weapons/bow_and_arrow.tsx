@@ -8,6 +8,7 @@ const bow_and_arrow: Item = {
   price: 10,
   effect: '70',
   url: './assets/items/bow.jpg',
+  count: 0,
 };
 
 export default bow_and_arrow;

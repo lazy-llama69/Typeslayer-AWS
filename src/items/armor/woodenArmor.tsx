@@ -8,6 +8,7 @@ const woodenArmor: Item = {
   price: 50,
   effect: '10',
   url: './assets/items/wooden_armor.jpg',
+  count: 0,
 };
 
 export default woodenArmor;
