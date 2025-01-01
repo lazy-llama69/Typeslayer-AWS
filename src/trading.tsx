@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button, Card, Image, View, Flex, Badge, Divider, Heading, StepperField, IconsProvider  } from '@aws-amplify/ui-react';
+import { Button, Card, Image, View, Flex, Badge, Divider, Heading, StepperField, IconsProvider, ThemeProvider, Breadcrumbs, createTheme  } from '@aws-amplify/ui-react';
 import { TraderModel } from './models/traderModel';
 import { PlayerModel } from './models/playerModel';
 import { Item } from './items/item';
@@ -77,83 +77,125 @@ const Trading = () => {
       }
   };
 
+   const theme = createTheme({
+      name: 'breadcrumbs-theme',
+      tokens: {
+        components: {
+          breadcrumbs: {
+            separator: {
+              color: '{colors.secondary.20}',
+              fontSize: '{fontSizes.xl}',
+              paddingInline: '{space.medium}',
+            },
+            link: {
+              color: '#520e90'
+            },
+          },
+        },
+      },
+    });
+
   return (
     <View padding="2rem">
-      <Heading level={2}>Welcome to the Shop, {player?.username}</Heading>
-      <p>Current Money: {player?.money}</p>
-      <p>{message}</p>
-
-      <Flex direction="row" gap="20px" wrap="wrap" justifyContent="center">
-        {itemsForSale.map((item) => (
-          <Card
-            key={item.id}
-            borderRadius="medium"
-            maxWidth="20rem"
-            variation="outlined"
-            onClick={() => setSelectedItem(item)}
-            style={{
-              cursor: 'pointer',
-              border: selectedItem === item ? '2px solid blue' : '1px solid #ddd',
-            }}
-          >
-            <Image src={item.url} alt={item.name} />
-            <View padding="xs">
-              <Flex direction="row" gap="1.5rem" justifyContent="center" alignItems="center">
-                <Badge backgroundColor="yellow.60">{item.price} gold</Badge>
-              </Flex>
-            </View>
-            <Divider padding="xs" />
-            <Flex direction="row" gap="0.5rem" justifyContent="center" alignItems="center">
-              <Heading padding="medium">{item.name}</Heading>
+        <Flex direction="column" alignItems="flex-start">
+            <Flex direction="row" justifyContent="flex-start" width="100%"> 
+            {/* Breadcrumbs Component */}
+            <ThemeProvider theme={theme}>
+                    <Breadcrumbs.Container borderRadius="medium" padding="medium">
+                        {breadcrumbs.map((text, idx) => (
+                            
+                            <Breadcrumbs.Item key={`${idx}`} color={"#3F00FF"}>
+                                <Breadcrumbs.Link 
+                                    isCurrent={idx === breadcrumbs.length - 1}
+                                    style={{
+                                        fontWeight: 'bold',
+                                        textDecoration: 'underline',
+                                    }}
+                                >
+                                    {text}
+                                </Breadcrumbs.Link>
+                                {idx !== breadcrumbs.length - 1 && <Breadcrumbs.Separator />} {/* Add separator except for the last item */}
+                            </Breadcrumbs.Item>
+                        ))}
+                    </Breadcrumbs.Container>
+            </ThemeProvider>
             </Flex>
-            <IconsProvider
-                icons={{
-                stepperField: {
-                    add: <FiPlusSquare />,
-                    remove: <FiMinusSquare />,
-                },
+        </Flex>
+        <Heading level={2}>Welcome to the Shop, {player?.username}</Heading>
+        <p>Current Money: {player?.money}</p>
+        <p>{message}</p>
+
+        <Flex direction="row" gap="20px" wrap="wrap" justifyContent="center">
+            {itemsForSale.map((item) => (
+            <Card
+                key={item.id}
+                borderRadius="medium"
+                maxWidth="20rem"
+                variation="outlined"
+                onClick={() => setSelectedItem(item)}
+                style={{
+                cursor: 'pointer',
+                border: selectedItem === item ? '2px solid blue' : '1px solid #ddd',
                 }}
             >
-                <StepperField
-                label="Themed stepper"
-                defaultValue={0}
-                min={0}
-                max={10}
-                step={1}
-                labelHidden
-                value={quantities[item.id] || 0}
-                onStepChange={(newValue) => handleOnStepChange(item.id, newValue)}
-                />
-            </IconsProvider>
-          </Card>
-        ))}
-      </Flex>
+                <Image src={item.url} alt={item.name} />
+                <View padding="xs">
+                <Flex direction="row" gap="1.5rem" justifyContent="center" alignItems="center">
+                    <Badge backgroundColor="yellow.60">{item.price} gold</Badge>
+                </Flex>
+                </View>
+                <Divider padding="xs" />
+                <Flex direction="row" gap="0.5rem" justifyContent="center" alignItems="center">
+                <Heading padding="medium">{item.name}</Heading>
+                </Flex>
+                <IconsProvider
+                    icons={{
+                    stepperField: {
+                        add: <FiPlusSquare />,
+                        remove: <FiMinusSquare />,
+                    },
+                    }}
+                >
+                    <StepperField
+                    label="Themed stepper"
+                    defaultValue={0}
+                    min={0}
+                    max={10}
+                    step={1}
+                    labelHidden
+                    value={quantities[item.id] || 0}
+                    onStepChange={(newValue) => handleOnStepChange(item.id, newValue)}
+                    />
+                </IconsProvider>
+            </Card>
+            ))}
+        </Flex>
 
-      <Flex direction="column" alignItems="center">
-        <p>Total Cost: {totalCost}</p>
-        <Flex direction="row" justifyContent="center" alignItems="center" width="100%" >
-            <Button
-                borderRadius='10px'
-                variation="primary"
-                size="large"
-                isDisabled={totalCost === 0}
-                onClick={handlePurchase}
-            >
-                Buy
-            </Button>
+        <Flex direction="column" alignItems="center">
+            <p>Total Cost: {totalCost}</p>
+            <Flex direction="row" justifyContent="center" alignItems="center" width="100%" >
+                <Button
+                    borderRadius='10px'
+                    variation="primary"
+                    size="large"
+                    isDisabled={totalCost === 0}
+                    onClick={handlePurchase}
+                >
+                    Buy
+                </Button>
 
-            <Button
-                borderRadius='10px'
-                variation="primary"
-                size="large"
-                onClick={() => navigate(`/pathselection/${defeatedBossCount}`)} // Navigate back to the path selection page
-            >
-                Back to Paths
-            </Button>
+                <Button
+                    borderRadius='10px'
+                    variation="primary"
+                    size="large"
+                    onClick={() => navigate(`/pathselection/${defeatedBossCount}`)} // Navigate back to the path selection page
+                >
+                    Back to Paths
+                </Button>
+            </Flex>
+            
         </Flex>
         
-      </Flex>
-      
     </View>
   );
 };
