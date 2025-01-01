@@ -509,9 +509,14 @@ const GamePlay = () => {
               value={selectedWeapon || 'invalid'}
               onChange={handleEquipmentChange} // Call handler on change
             > 
-              <Radio value="1001">Wooden Sword</Radio>
-              <Radio value="1002">Bow And Arrow</Radio>
-              <Radio value="1003">Magic Wand</Radio>
+              {/* Render only weapons available in the player's inventory */}
+              {player?.inventory
+                .filter((item) => item.type === 'weapon')  // Assuming each item has a 'type' property
+                .map((weapon) => (
+                  <Radio key={weapon.id} value={weapon.id}>
+                    {weapon.name} {/* Assuming each weapon has a 'name' property */}
+                  </Radio>
+                ))}
             </RadioGroupField>
           
           <Divider orientation="horizontal" size='large' border="5px solid pink" borderRadius="1px" />
@@ -525,9 +530,13 @@ const GamePlay = () => {
             value={selectedClothing || "invalid"}
             onChange={handleEquipmentChange} // Call handler on change
           >
-            <Radio value="2001">Wooden Armour</Radio>
-            <Radio value="2002">Steel Armour</Radio>
-            <Radio value="2003">Fireproof Vest</Radio>
+            {player?.inventory
+                .filter((item) => item.type === 'armor')  // Assuming each item has a 'type' property
+                .map((weapon) => (
+                  <Radio key={weapon.id} value={weapon.id}>
+                    {weapon.name} {/* Assuming each weapon has a 'name' property */}
+                  </Radio>
+                ))}
           </RadioGroupField>
 
           <Divider orientation="horizontal" size='large' border="5px solid pink" borderRadius="1px" />
@@ -541,9 +550,13 @@ const GamePlay = () => {
             value={selectedPotion || "invalid"}
             onChange={handlePotionChosen} // Call handler on change
           >
-            <Radio value="3001">Healing Potion</Radio>
-            <Radio value="3002">Attack Potion</Radio>
-            <Radio value="3003">Armor Potion</Radio>
+            {player?.inventory
+                .filter((item) => item.type === 'potion')  // Assuming each item has a 'type' property
+                .map((weapon) => (
+                  <Radio key={weapon.id} value={weapon.id}>
+                    {weapon.name} {/* Assuming each weapon has a 'name' property */}
+                  </Radio>
+                ))}
           </RadioGroupField>
           <Flex direction="row" justifyContent="center" marginBottom="-1rem" marginTop="-1rem" >
           <p>
