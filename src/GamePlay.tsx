@@ -9,6 +9,7 @@ import { HiOutlineArrowSmallUp, HiOutlineArrowSmallDown, HiOutlineArrowSmallLeft
 import wordDict from './assets/words_dictionary.json'; 
 import axios from 'axios';
 import { GiPotionBall, GiCrossedSwords, GiShoulderArmor } from "react-icons/gi";
+import woodenSword from './items/weapons/woodenSword';
 
 const GamePlay = () => {
   const {pathId, defeatedBossCount: totalDefeatedBossCount } = useParams();
@@ -25,9 +26,9 @@ const GamePlay = () => {
   const [breadcrumbs, setBreadcrumbs] = useState<string[]>(['Start']);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
-  const [selectedWeapon, setSelectedWeapon] = useState<string | null>("1001"); // Default value
-  const [selectedClothing, setSelectedClothing] = useState<string | null>('2001'); //Default value
-  const [selectedPotion, setSelectedPotion] = useState<string | null>('3001'); //Default value
+  const [selectedWeapon, setSelectedWeapon] = useState<string | null>(null); // Default value
+  const [selectedClothing, setSelectedClothing] = useState<string | null>(null); //Default value
+  const [selectedPotion, setSelectedPotion] = useState<string | null>(null); //Default value
   const [isInitialized, setIsInitialized] = useState(false);   
   const [avatarImage, setAvatarImage] = useState<string>();
 
@@ -438,8 +439,8 @@ const GamePlay = () => {
 
   const debugButton = () => {
     console.log(player);
-    console.log(player?.inventory);
-    console.log(player?.equippedItems);
+    console.log("Inventory: ",player?.inventory);
+    console.log("Equipped: ",player?.equippedItems);
     // console.log(player instanceof PlayerModel); // Should return true
     // console.log(player?.damage);
     // console.log(boss?.health);
@@ -451,7 +452,8 @@ const GamePlay = () => {
     // add weapons
     // player?.addItem(bow_and_arrow);
     // player?.addItem(magic_wand);
-    // player?.addItem(woodenSword);
+    // player?.equipItem(woodenSword);
+    
 
 
     // remove weapons
@@ -586,7 +588,7 @@ const GamePlay = () => {
         </Menu>
       </View>
 
-      {/*Top section */}
+      {/* Breacrumbs/Top section */}
       <Flex direction="column" alignItems="flex-start">
         <Flex direction="row" justifyContent="flex-start" width="100%"> 
           {/* Breadcrumbs Component */}
@@ -619,7 +621,7 @@ const GamePlay = () => {
         ) : (
           <>
             <Heading level={1}>Battle!</Heading>
-            <Flex direction="row" justifyContent="space-between" alignItems="flex-start" width="100%" gap="10rem">
+            <Flex direction="row" justifyContent="space-between" alignItems="flex-start" width="100%" gap="10rem" marginBottom="-20px">
               {/* Player Section */}
               <Flex direction="column" alignItems="center" gap="0.5rem">
                 <Heading level={2}>Player:</Heading>

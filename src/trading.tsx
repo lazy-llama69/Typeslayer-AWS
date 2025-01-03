@@ -19,13 +19,20 @@ const Trading = () => {
   const [breadcrumbs, setBreadcrumbs] = useState<string[]>(['Start']);
   const [player, setPlayer] = useState<PlayerModel | null>(null);
   const [quantities, setQuantities] = useState<{ [itemId: string]: number }>({});
+  const [itemsForSale, setItemsForSale] = useState<Item[]>();
   
   useEffect(() => {
     loadPlayerData(); //This effect starts the game
+    chooseItemsForSale();
   }, []);
 
-  const itemsForSale = trader.itemsForSale;
-
+  const chooseItemsForSale = () => {
+    const items = trader.itemsForSale;
+    // Shuffle the available items and select the first 3
+    const shuffled = items.sort(() => Math.random() - 0.5);
+    setItemsForSale(shuffled.slice(0,3));
+  }
+ 
   const loadPlayerData = () => {
     const storedPlayerData = localStorage.getItem('playerData');
 
@@ -43,26 +50,30 @@ const Trading = () => {
     }
   };
 
+  const savePlayerData = () => {
+    if (player) {
+      localStorage.setItem('playerData', JSON.stringify(player));
+    }
+  };
+
   // Update the quantity
   const handleOnStepChange = (itemId: string, newValue: number) => {
     setQuantities((prev) => ({ ...prev, [itemId]: newValue }));
   };
 
   // Calculates the total cost for all items
-  const totalCost = itemsForSale.reduce(
+  const totalCost = itemsForSale?.reduce(
     (sum, item) => sum + (quantities[item.id] || 0) * item.price,
     0
   );
 
-
-
   // Handle item purchase
   const handlePurchase = () => {
-    if (player) {
+    if (player && totalCost) {
         // Check if the player has enough money
         if (player.money >= (totalCost)) {
           for (const [itemId, quantity] of Object.entries(quantities)) {
-            const item = itemsForSale.find((i) => i.id === itemId);
+            const item = itemsForSale?.find((i) => i.id === itemId);
             if (item && quantity > 0) {
               for (let i = 0; i < quantity; i++) {
                 trader.trade(player, item.id); // Trade each item
@@ -75,25 +86,33 @@ const Trading = () => {
           setMessage('Not enough money to complete the purchase.');
         }
       }
+    savePlayerData();
   };
 
-   const theme = createTheme({
-      name: 'breadcrumbs-theme',
-      tokens: {
-        components: {
-          breadcrumbs: {
-            separator: {
-              color: '{colors.secondary.20}',
-              fontSize: '{fontSizes.xl}',
-              paddingInline: '{space.medium}',
-            },
-            link: {
-              color: '#520e90'
-            },
+  const theme = createTheme({
+    name: 'breadcrumbs-theme',
+    tokens: {
+      components: {
+        breadcrumbs: {
+          separator: {
+            color: '{colors.secondary.20}',
+            fontSize: '{fontSizes.xl}',
+            paddingInline: '{space.medium}',
+          },
+          link: {
+            color: '#520e90'
           },
         },
       },
-    });
+    },
+  });
+
+  const refresh = () => {
+    const items = trader.itemsForSale;
+    // Shuffle the available items and select the first 3
+    const shuffled = items.sort(() => Math.random() - 0.5);
+    setItemsForSale(shuffled.slice(0,3));
+  }
 
   return (
     <View padding="2rem">
@@ -126,7 +145,7 @@ const Trading = () => {
         <p>{message}</p>
 
         <Flex direction="row" gap="20px" wrap="wrap" justifyContent="center">
-            {itemsForSale.map((item) => (
+            {itemsForSale?.map((item) => (
             <Card
                 key={item.id}
                 borderRadius="medium"
@@ -138,7 +157,7 @@ const Trading = () => {
                 border: selectedItem === item ? '2px solid blue' : '1px solid #ddd',
                 }}
             >
-                <Image src={item.url} alt={item.name} />
+                <Image src={item.url} alt={item.name} width='300px' height='300px'/>
                 <View padding="xs">
                 <Flex direction="row" gap="1.5rem" justifyContent="center" alignItems="center">
                     <Badge backgroundColor="yellow.60">{item.price} gold</Badge>
@@ -192,6 +211,7 @@ const Trading = () => {
                 >
                     Back to Paths
                 </Button>
+                <Button onClick={refresh}> refresh</Button>
             </Flex>
             
         </Flex>

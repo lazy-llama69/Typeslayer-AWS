@@ -1,11 +1,5 @@
-import bow_and_arrow from "../items/weapons/bow_and_arrow";
 import { Item } from "../items/item";
-import magic_wand from "../items/weapons/magic_wand";
-import steelArmor from "../items/armor/steelArmor";
-import fireArmor from "../items/armor/fireArmor";
-import woodenSword from "../items/weapons/woodenSword";
-import woodenArmor from "../items/armor/woodenArmor";
-import healingPotion from "../items/potions/healingPotion";
+
   
   export interface Player {
     id: string;            // Unique identifier for the player (could be userId from Cognito)
@@ -50,16 +44,6 @@ import healingPotion from "../items/potions/healingPotion";
       this.score = 0;           // default score
       this.damage = 5;          // base damage
       this.armor = 0;           // default armor
-      this.addItem(woodenSword);
-      this.addItem(magic_wand);
-      this.addItem(bow_and_arrow);
-      this.addItem(steelArmor);
-      this.addItem(fireArmor);
-      this.addItem(woodenArmor);
-      this.equipItem(woodenSword);
-      this.equipItem(woodenArmor);
-      this.addItem(healingPotion);
-      this.addItem(healingPotion);
     }
   
     // Method to increase experience and level up

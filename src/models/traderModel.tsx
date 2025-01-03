@@ -2,6 +2,12 @@ import { PlayerModel } from "./playerModel";
 import healingPotion from '../items/potions/healingPotion';
 import ironSword from '../items/weapons/woodenSword';
 import steelArmor from '../items/armor/steelArmor';
+import fireArmor from "../items/armor/fireArmor";
+import woodenArmor from "../items/armor/woodenArmor";
+import armorPotion from "../items/potions/armorPotion";
+import attackPotion from "../items/potions/attackPotion";
+import bow_and_arrow from "../items/weapons/bow_and_arrow";
+import magic_wand from "../items/weapons/magic_wand";
 import { Item } from "../items/item";
   
   // Trader Model Class
@@ -14,6 +20,12 @@ import { Item } from "../items/item";
         healingPotion,
         ironSword,
         steelArmor,
+        fireArmor,
+        woodenArmor,
+        armorPotion,
+        attackPotion,
+        bow_and_arrow,
+        magic_wand,
       ];
     }
   

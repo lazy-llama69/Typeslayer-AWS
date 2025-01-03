@@ -7,7 +7,7 @@ const woodenArmor: Item = {
   type: 'armor',
   price: 50,
   effect: '10',
-  url: '/assets/items/wooden_armor.jpg',
+  url: '/assets/items/wooden_armor.png',
   count: 0,
 };
 

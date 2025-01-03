@@ -7,7 +7,7 @@ const attackPotion: Item = {
   type: 'potion',
   price: 25,
   effect: 'attack',  
-  url: '/assets/items/attack_potion.jpg',
+  url: '/assets/items/attack_potion.png',
   count: 0,
 
 };
