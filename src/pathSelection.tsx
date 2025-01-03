@@ -5,6 +5,7 @@ import { Button, Collection, Card, Image, View, Flex, Badge, Divider, Heading, B
 import forestCabin from '/assets/paths/forest_cabin.jpg';
 import ybr from '/assets/paths/yellowbrickroad.jpg';
 import shop from '/assets/paths/shop.jpg';
+import haunted_castle from '/assets/paths/haunted_castle.png'
 
 
 
@@ -46,7 +47,7 @@ const PathSelection = () => {
         {
             title: 'The Haunted Castle',
             badges: ['Medium', 'Fire'],
-            imageUrl: shop,
+            imageUrl: haunted_castle,
             pathId: 3,
         },
         {

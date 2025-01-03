@@ -36,22 +36,22 @@ const Leaderboards = () => {
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <Table>
-          <TableHead>
+        <Table variation="bordered">
+          <TableHead textAlign='center'>
             <TableRow>
-              <TableCell as="th">Rank</TableCell>
-              <TableCell as="th">Username</TableCell>
-              <TableCell as="th">Score</TableCell>
-              <TableCell as="th">Bosses Killed</TableCell>
+              <TableCell as="th" textAlign='center'>Rank</TableCell>
+              <TableCell as="th" textAlign='center'>Username</TableCell>
+              <TableCell as="th" textAlign='center'>Score</TableCell>
+              <TableCell as="th" textAlign='center'>Bosses Killed</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {leaderboard.map((entry, index) => (
               <TableRow key={index}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell>{entry.username}</TableCell>
-                <TableCell>{entry.score}</TableCell>
-                <TableCell>{entry.bossCount}</TableCell>
+                <TableCell textAlign='center'>{index + 1}</TableCell>
+                <TableCell textAlign='center'>{entry.username}</TableCell>
+                <TableCell textAlign='center'>{entry.score}</TableCell>
+                <TableCell textAlign='center'>{entry.bossCount}</TableCell>
               </TableRow>
             ))}
           </TableBody>

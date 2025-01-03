@@ -9,8 +9,7 @@ import { HiOutlineArrowSmallUp, HiOutlineArrowSmallDown, HiOutlineArrowSmallLeft
 import wordDict from './assets/words_dictionary.json'; 
 import axios from 'axios';
 import { GiPotionBall, GiCrossedSwords, GiShoulderArmor } from "react-icons/gi";
-import woodenSword from './items/weapons/woodenSword';
-
+  
 const GamePlay = () => {
   const {pathId, defeatedBossCount: totalDefeatedBossCount } = useParams();
   const [player, setPlayer] = useState<PlayerModel | null>(null);
