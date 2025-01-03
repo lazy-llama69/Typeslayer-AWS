@@ -9,11 +9,9 @@ import { HiOutlineArrowSmallUp, HiOutlineArrowSmallDown, HiOutlineArrowSmallLeft
 import wordDict from './assets/words_dictionary.json'; 
 import axios from 'axios';
 import { GiPotionBall, GiCrossedSwords, GiShoulderArmor } from "react-icons/gi";
-import wicked from '/assets/entities/wicked_witch.jpg';
-import { Item } from './items/item';
 
 const GamePlay = () => {
-  const {  pathId, defeatedBossCount: totalDefeatedBossCount } = useParams();
+  const {pathId, defeatedBossCount: totalDefeatedBossCount } = useParams();
   const [player, setPlayer] = useState<PlayerModel | null>(null);
   const [boss, setBoss] = useState<BossModel | null>(null); // Boss state
   const [userInput, setUserInput] = useState(''); // User's input
@@ -150,9 +148,15 @@ const GamePlay = () => {
   const handCreateBoss = () => {
     if (!player) return;  // Ensure player is loaded before creating the boss
     
-      const [name, health, attack, reward, url] = bosses[pathId] || ['ERROR 404', 450, 55, 250];
-      const newBoss = new BossModel(name, health, attack, reward, url);
+    // Check if pathId is a valid key in bosses
+    if (pathId === "1" || pathId === "2" || pathId === "3") {
+      const [bossName, health, attack, reward, url] = bosses[pathId] as [string, number, number, number, string];;
+
+      const newBoss = new BossModel(bossName, health, attack, reward, url);
       setBoss(newBoss);
+    } else {
+      console.error("Invalid pathId:", pathId);
+    }
   };
 
   const handleReturnToMenu = () => {
@@ -235,7 +239,7 @@ const GamePlay = () => {
         return {
           ...prevBoss,
           health: updatedHealth,
-        };
+        } as BossModel;
       });
 
       // After each attack, there's a 50% chance to trigger the counterattack
@@ -254,7 +258,7 @@ const GamePlay = () => {
         return {
           ...prevBoss,
           health: healedHealth, // Apply healing
-        };
+        } as BossModel;
       });
     }
   };
@@ -315,7 +319,7 @@ const GamePlay = () => {
       return {
         ...prevPlayer,
         health: updatedHealth,
-      };
+      } as PlayerModel;
     });
   };
 
