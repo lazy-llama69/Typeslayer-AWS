@@ -15,6 +15,10 @@ main {
   align-items: stretch;
 }
 
+.amplify-dropzone {
+  background: linear-gradient(180deg, rgb(157, 114, 251),rgb(183, 159, 236) );;
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;

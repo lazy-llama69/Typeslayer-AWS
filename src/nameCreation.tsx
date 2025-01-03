@@ -1,13 +1,18 @@
 //nameCreation.tsx
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Input, View, Flex,  Heading } from '@aws-amplify/ui-react';
+import { Button, Input, View, Flex,  Heading, DropZone, Text, VisuallyHidden, Image } from '@aws-amplify/ui-react';
 import { PlayerModel } from './models/playerModel';
+import { MdCheckCircle, MdFileUpload, MdRemoveCircle } from 'react-icons/md';
 
 const nameCreation = () => {
     const navigate = useNavigate();
     const [avatarName, setAvatarName] = useState('');
     const [defeatedBossCount] = useState(0);
+    const [avatarImage, setAvatarImage] = useState<File | null>();
+    const hiddenInput = useRef<HTMLInputElement | null>(null);
+    const acceptedFileTypes = ['image/png', 'image/jpeg'];
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     // Handle return to menu
     const handleReturnToMenu = () => {
@@ -15,12 +20,15 @@ const nameCreation = () => {
     };
 
     const handleCreatePlayer = () => {
-        const newPlayer = new PlayerModel('1', avatarName!);
-
+        const avatarImageUrl = avatarImage ? URL.createObjectURL(avatarImage) : "/assets/entities/protagonist.jpg";
+        const newPlayer = new PlayerModel('1', avatarName);
+    
         // Save player to local storage
         localStorage.setItem('playerData', JSON.stringify(newPlayer));
+        //Save image to local storage
+        localStorage.setItem('avatarImageUrl', avatarImageUrl); 
 
-        // Pass the avatar name and selected path to the GamePlay component 
+        // Pass the defeated boss count to the GamePlay component 
         navigate(`/pathselection/${defeatedBossCount}`);
       };
 
@@ -32,6 +40,24 @@ const nameCreation = () => {
         }
         handleCreatePlayer();
         
+    };
+
+    const onFilePickerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (files && files.length > 0) {
+          const file = files[0];
+          if (acceptedFileTypes.includes(file.type)) {
+            handleFileSelection(file);
+          }
+        }
+    };
+    
+    const handleFileSelection = (file: File) => {
+        console.log("File selected:", file); // Debug: Check if the file is valid
+        setAvatarImage(file);
+        const url = URL.createObjectURL(file);
+        // console.log("Generated URL:", url); // Debug: Ensure the URL is generated correctly;
+        setPreviewUrl(url);
     };
 
     return (
@@ -46,6 +72,55 @@ const nameCreation = () => {
                 if (e.key === 'Enter') handleStartGame();
                 }}
             />
+        </Flex>
+
+        <Flex direction="column" gap="1rem" justifyContent="center" alignItems="center" margin="10px" borderRadius='50px'>
+            <DropZone
+            acceptedFileTypes={acceptedFileTypes}
+            
+            onDropComplete={({ acceptedFiles }) => {
+                if (acceptedFiles.length > 0) {
+                    const file = acceptedFiles[0];
+                    handleFileSelection(file);
+                } 
+            }}
+            >
+            <Flex direction="row" alignItems="center">
+                <DropZone.Default>
+                    <MdFileUpload fontSize="2rem" /> 
+                </DropZone.Default>
+                <DropZone.Accepted>
+                    <MdCheckCircle fontSize="2rem" />
+                    <Text>File accepted!</Text>
+                </DropZone.Accepted>
+                <DropZone.Rejected>
+                    <MdRemoveCircle fontSize="2rem" />
+                    <Text>Invalid file type.</Text>
+                </DropZone.Rejected>
+                
+                <Flex direction="column" alignItems="center">
+                    <Text>Drag avatar image here or</Text>
+                    <Button size="small" onClick={() => hiddenInput.current?.click()}>
+                        Browse
+                    </Button>
+                </Flex>
+                
+            </Flex>
+            <VisuallyHidden>
+                <input
+                type="file"
+                ref={hiddenInput}
+                onChange={onFilePickerChange}
+                accept={acceptedFileTypes.join(',')}
+                />
+            </VisuallyHidden>
+            {previewUrl && (
+                <Flex direction="column" alignItems="center">
+                <Text>Preview:</Text>
+                <Image src={previewUrl} alt="Avatar Preview" maxHeight='300px' maxWidth='300px'/>
+                </Flex>
+            )}
+            </DropZone>
         </Flex>
 
         

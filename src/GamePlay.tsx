@@ -10,7 +10,6 @@ import wordDict from './assets/words_dictionary.json';
 import axios from 'axios';
 import { GiPotionBall, GiCrossedSwords, GiShoulderArmor } from "react-icons/gi";
 import wicked from '/assets/entities/wicked_witch.jpg';
-import protagonist from '/assets/entities/protagonist.jpg';
 import { Item } from './items/item';
 
 const GamePlay = () => {
@@ -32,6 +31,7 @@ const GamePlay = () => {
   const [selectedClothing, setSelectedClothing] = useState<string | null>('2001'); //Default value
   const [selectedPotion, setSelectedPotion] = useState<string | null>('3001'); //Default value
   const [isInitialized, setIsInitialized] = useState(false);   
+  const [avatarImage, setAvatarImage] = useState<string>();
 
 
 
@@ -123,11 +123,14 @@ const GamePlay = () => {
 
   const loadPlayerData = () => {
     const storedPlayerData = localStorage.getItem('playerData');
+    const storedImageUrl = localStorage.getItem('avatarImageUrl');
 
-    if (storedPlayerData) {
+    if (storedPlayerData && storedImageUrl) {
       const parsedPlayer = JSON.parse(storedPlayerData);
       const reconstructedPlayer = Object.assign(new PlayerModel(parsedPlayer.id,parsedPlayer.username), parsedPlayer);
+      
       setPlayer(reconstructedPlayer);  // Set the player with the data from localStorage
+      setAvatarImage(storedImageUrl);  // Set the image url with the data from localStorage
     } else {
       navigate('/');  // Redirect to the name creation screen if player data is not found
     }
@@ -139,15 +142,16 @@ const GamePlay = () => {
   };
 
   const bosses = {
-    "1": ['Slendy Manny', 150, 25, 50],
-    "2": ['The Wicked Witch', 150, 25, 50],
-    "3": ['Shopkeeper', 150, 25, 50],
+    "3": ['Slendy Manny', 150, 25, 50,'/assets/entities/slenddy.jpg'],
+    "1": ['The Wicked Witch', 150, 25, 50,'/assets/entities/wicked_witch.jpg'],
+    "2": ['Goblin', 150, 25, 50,'/assets/entities/goblin.jpg'],
   };
 
   const handCreateBoss = () => {
     if (!player) return;  // Ensure player is loaded before creating the boss
-      const [name, health, attack, reward] = bosses[pathId] || ['ERROR 404', 450, 55, 250];
-      const newBoss = new BossModel(name, health, attack, reward);
+    
+      const [name, health, attack, reward, url] = bosses[pathId] || ['ERROR 404', 450, 55, 250];
+      const newBoss = new BossModel(name, health, attack, reward, url);
       setBoss(newBoss);
   };
 
@@ -427,6 +431,7 @@ const GamePlay = () => {
     }
   }
 
+
   const debugButton = () => {
     console.log(player);
     console.log(player?.inventory);
@@ -616,7 +621,7 @@ const GamePlay = () => {
                 <Heading level={2}>Player:</Heading>
                 <Heading level={2}> {player.username}</Heading>
                 <img
-                  src={protagonist} // Adjust the path as needed
+                  src={avatarImage} 
                   alt={`${player.username}`}
                   style={{ width: '300px', height: '300px', objectFit: 'cover', borderRadius: '8px' }}
                 />
@@ -632,7 +637,7 @@ const GamePlay = () => {
                   <Heading level={2}>Boss: </Heading>
                   <Heading level={2}> {boss.name}</Heading>
                   <img
-                    src={(wicked)} 
+                    src={boss.url} 
                     alt={`${boss.name}`}
                     style={{ width: '300px', height: '300px', objectFit: 'cover', borderRadius: '8px' }}
                   />
