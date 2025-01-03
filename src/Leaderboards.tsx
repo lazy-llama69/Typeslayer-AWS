@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Button, Heading, View, Table, TableBody, TableCell, TableHead, TableRow } from "@aws-amplify/ui-react";
+import { Button, Heading, View, Table, TableBody, TableCell, TableHead, TableRow, Flex } from "@aws-amplify/ui-react";
 import { useNavigate } from "react-router-dom";
 
 type LeaderboardEntry = {
@@ -32,7 +32,9 @@ const Leaderboards = () => {
 
   return (
     <View padding="2rem">
-      <Heading level={1}>Leaderboards</Heading>
+      <Flex  direction="row" gap="0.5rem" justifyContent="center" alignItems="center">
+        <Heading level={1}>Leaderboards</Heading>
+      </Flex>
       {loading ? (
         <p>Loading...</p>
       ) : (
@@ -57,8 +59,10 @@ const Leaderboards = () => {
           </TableBody>
         </Table>
       )}
-      <Button onClick={fetchLeaderboard}>Refresh</Button>
-      <Button onClick={() => navigate("/")}>Back to main menu</Button>
+      <Flex direction="row" gap="0.5rem" justifyContent="center" alignItems="center" margin="1rem"> 
+        <Button onClick={fetchLeaderboard}>Refresh</Button>
+        <Button variation="primary" onClick={() => navigate("/")}>Return to main menu</Button>
+      </Flex>
     </View>
   );
 };
