@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { Button, Heading, View, Table, TableBody, TableCell, TableHead, TableRow, Flex } from "@aws-amplify/ui-react";
 import { useNavigate } from "react-router-dom";
@@ -11,33 +11,32 @@ type LeaderboardEntry = {
 
 const Leaderboards = () => {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const fetchLeaderboard = async () => {
-    setLoading(true);
     try {
-      const response = await axios.get("http://localhost:3000/leaderboard");
-      setLeaderboard(response.data);
+      const response = await axios.get("https://5sovduu1i1.execute-api.ap-southeast-2.amazonaws.com/dev/leaderboard");
+      
+      // JSON-nify the response to be readable
+      setLeaderboard(JSON.parse(response.data.body).leaderboardData);
+      // console.log("This is the response:",JSON.parse(response.data.body).leaderboardData);
+      // console.log("This is the leaderboard:",leaderboard);  
     } catch (error) {
       console.error("Error fetching leaderboard data:", error);
-    } finally {
-      setLoading(false);
-    }
+    } 
+    console.log("Fetching leaderboard...")
   };
 
   useEffect(() => {
     fetchLeaderboard();
-  }, []);
+  }, []); //This effect loads the leaderboard
+
 
   return (
     <View padding="2rem">
       <Flex  direction="row" gap="0.5rem" justifyContent="center" alignItems="center">
         <Heading level={1}>Leaderboards</Heading>
-      </Flex>
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
+      </Flex> 
         <Table variation="bordered">
           <TableHead textAlign='center'>
             <TableRow>
@@ -58,11 +57,11 @@ const Leaderboards = () => {
             ))}
           </TableBody>
         </Table>
-      )}
       <Flex direction="row" gap="0.5rem" justifyContent="center" alignItems="center" margin="1rem"> 
         <Button onClick={fetchLeaderboard}>Refresh</Button>
         <Button variation="primary" onClick={() => navigate("/")}>Return to main menu</Button>
-      </Flex>
+      </Flex> 
+
     </View>
   );
 };
