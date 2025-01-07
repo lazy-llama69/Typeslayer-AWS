@@ -40,9 +40,9 @@ import { Item } from "../items/item";
       this.experience = 0;      // default experience
       this.inventory = [];      // empty inventory
       this.equippedItems = [];  // no items equipped initially
-      this.money = 100000;           // default money
+      this.money = 0;           // default money
       this.score = 0;           // default score
-      this.damage = 5;          // base damage
+      this.damage = 200;          // base damage
       this.armor = 0;           // default armor
     }
   
@@ -67,7 +67,7 @@ import { Item } from "../items/item";
     // Method to level up player
     levelUp() {
       this.level++;
-      this.maxHealth += 20; // Max health increases with each level
+      this.maxHealth += 50; // Max health increases with each level
       this.health = this.maxHealth; // Restore full health upon leveling up
     }
   

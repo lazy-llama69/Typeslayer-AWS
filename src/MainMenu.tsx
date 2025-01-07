@@ -13,11 +13,6 @@ const MainMenu = () => {
         navigate('/nameCreation'); // navigate to the gameplay screen
     };
 
-    const handleContinueGame = () => {
-        console.log('Continuing game...');
-        // Implement logic to continue the game if applicable
-    };
-
     const handleLeaderboards = () => {
         console.log('Opening leaderboards...');
         navigate('/leaderboards');
@@ -28,17 +23,22 @@ const MainMenu = () => {
         // Implement settings logic here
     };
 
+    const handlePractice = () => {
+        console.log('Opening practice mode...');
+        navigate('/practice');
+    };
+
     return (
         <View className="main-menu" padding = "2rem">
             <Flex direction="column" gap="1rem" alignItems="center">
                 <Heading level={1}>Welcome, {user?.signInDetails?.loginId?.toUpperCase()}</Heading>
 
                 <Button variation="primary" size="large" onClick={handleNewGame}>
-                New Game
+                New Game    
                 </Button>
 
-                <Button variation="primary" size="large" onClick={handleContinueGame} isDisabled={true}>
-                Continue Game
+                <Button variation="primary" size="large" onClick={handlePractice}>
+                Practice Mode
                 </Button>
 
                 <Button variation="primary" size="large" onClick={handleLeaderboards}>

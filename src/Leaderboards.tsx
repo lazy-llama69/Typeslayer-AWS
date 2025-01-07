@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Button, Heading, View, Table, TableBody, TableCell, TableHead, TableRow, Flex } from "@aws-amplify/ui-react";
+import { Button, Heading, View, Table, TableBody, TableCell, TableHead, TableRow, Flex, Loader } from "@aws-amplify/ui-react";
 import { useNavigate } from "react-router-dom";
 
 type LeaderboardEntry = {
@@ -11,6 +11,7 @@ type LeaderboardEntry = {
 
 const Leaderboards = () => {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(true); // State to track loading
   const navigate = useNavigate();
 
   const fetchLeaderboard = async () => {
@@ -23,7 +24,9 @@ const Leaderboards = () => {
       // console.log("This is the leaderboard:",leaderboard);  
     } catch (error) {
       console.error("Error fetching leaderboard data:", error);
-    } 
+    } finally {
+      setLoading(false); // Set loading to false after fetching completes (either success or failure)
+    }
     console.log("Fetching leaderboard...")
   };
 
@@ -36,6 +39,12 @@ const Leaderboards = () => {
       <Flex  direction="row" gap="0.5rem" justifyContent="center" alignItems="center">
         <Heading level={1}>Leaderboards</Heading>
       </Flex> 
+      {loading ? (
+        <Flex justifyContent="center" alignItems="center" height="100vh">
+          {/* Display a loader when loading */}
+          <Loader size="large" variation="linear"/>
+        </Flex>
+      ) : (
         <Table variation="bordered">
           <TableHead textAlign='center'>
             <TableRow>
@@ -56,6 +65,7 @@ const Leaderboards = () => {
             ))}
           </TableBody>
         </Table>
+      )}
       <Flex direction="row" gap="0.5rem" justifyContent="center" alignItems="center" margin="1rem"> 
         <Button onClick={fetchLeaderboard}>Refresh</Button>
         <Button variation="primary" onClick={() => navigate("/")}>Return to main menu</Button>

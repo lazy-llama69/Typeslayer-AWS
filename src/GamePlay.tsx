@@ -9,6 +9,7 @@ import { HiOutlineArrowSmallUp, HiOutlineArrowSmallDown, HiOutlineArrowSmallLeft
 import wordDict from './assets/words_dictionary.json'; 
 import axios from 'axios';
 import { GiPotionBall, GiCrossedSwords, GiShoulderArmor } from "react-icons/gi";
+import { FaArrowRight } from "react-icons/fa";
 
   
 const GamePlay = () => {
@@ -166,15 +167,19 @@ const GamePlay = () => {
   // Function to handle boss defeat
   const handleBossDefeat = () => {
     if (boss && player){
+      if (!(player instanceof PlayerModel)){
+        loadPlayerData();
+      }
       // console.log("Handle boss defeat called");
       player.money += boss.bounty;
       player.score += boss.score;
+      player.gainExperience(100);
       savePlayerData(); // Save updated player data after defeating the boss
       alert('You have defeated the boss');
       // console.log("This is the players money",player?.money);
       // console.log('This is the defeated boss count', defeatedBossCount+1);
     }
-    if (defeatedBossCount+1 === 2) {  
+    if (defeatedBossCount+1 === 5) {  
       // After the second boss is defeated, end the game
       alert('You have defeated all bosses! You win!');
       handleEnd();
@@ -349,11 +354,6 @@ const GamePlay = () => {
     tokens: {
       components: {
         breadcrumbs: {
-          separator: {
-            color: '{colors.secondary.20}',
-            fontSize: '{fontSizes.xl}',
-            paddingInline: '{space.medium}',
-          },
           link: {
             color: '#520e90'
           },
@@ -603,7 +603,7 @@ const GamePlay = () => {
                             >
                                 {text}
                             </Breadcrumbs.Link>
-                            {idx !== breadcrumbs.length - 1 && <Breadcrumbs.Separator />} {/* Add separator except for the last item */}
+                            {idx !== breadcrumbs.length - 1 && <FaArrowRight color= "pink" size="25px"/>} {/* Add separator except for the last item */}
                         </Breadcrumbs.Item>
                     ))}
                 </Breadcrumbs.Container>
@@ -687,5 +687,4 @@ const GamePlay = () => {
     </View>
   );
 };
-
 export default GamePlay;

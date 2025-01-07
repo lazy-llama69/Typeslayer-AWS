@@ -161,7 +161,7 @@ const PathSelection = () => {
                     }}
                 >
                    
-                    <Image src={item.imageUrl} alt={item.title} />
+                    <Image src={item.imageUrl} alt={item.title} width="300px" height="300px" />
                     <View padding="xs">
                     <Flex direction="row" gap="1.5rem" justifyContent="center" alignItems="center">
 
