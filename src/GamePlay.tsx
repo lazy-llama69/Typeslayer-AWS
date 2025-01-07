@@ -9,6 +9,7 @@ import { HiOutlineArrowSmallUp, HiOutlineArrowSmallDown, HiOutlineArrowSmallLeft
 import wordDict from './assets/words_dictionary.json'; 
 import axios from 'axios';
 import { GiPotionBall, GiCrossedSwords, GiShoulderArmor } from "react-icons/gi";
+
   
 const GamePlay = () => {
   const {pathId, defeatedBossCount: totalDefeatedBossCount } = useParams();
@@ -30,8 +31,6 @@ const GamePlay = () => {
   const [selectedPotion, setSelectedPotion] = useState<string | null>(null); //Default value
   const [isInitialized, setIsInitialized] = useState(false);   
   const [avatarImage, setAvatarImage] = useState<string>();
-
-
 
   useEffect(() => {
     if (counterattackInProgress) {
@@ -194,13 +193,12 @@ const GamePlay = () => {
   };
 
   const updateLeaderboard = async (name: string, score: number) => {  
-    console.log("This is the name and score", name,score)
+    console.log("This is the name and score", name,score);
     try {
-      const scoreAsString = String(score);  
       const bossCount = defeatedBossCount+1;
-      const response = await axios.post('http://localhost:3000/leaderboard', {
+      const response = await axios.post("https://5sovduu1i1.execute-api.ap-southeast-2.amazonaws.com/dev/leaderboard", {
         username: name,
-        score: scoreAsString,
+        score: score,
         bossCount,
       });
       console.log('Leaderboard updated', response.data);

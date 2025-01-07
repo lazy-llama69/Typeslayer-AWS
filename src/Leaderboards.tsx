@@ -31,7 +31,6 @@ const Leaderboards = () => {
     fetchLeaderboard();
   }, []); //This effect loads the leaderboard
 
-
   return (
     <View padding="2rem">
       <Flex  direction="row" gap="0.5rem" justifyContent="center" alignItems="center">
