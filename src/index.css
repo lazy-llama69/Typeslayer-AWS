@@ -67,3 +67,24 @@ a {
   font-weight: 800;
   text-decoration: none;
 } 
+
+.number-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  min-width: 200px;
+  margin-top: 20px
+}
+
+.number-pad button {
+  font-size: 24px;
+  padding: 5px;
+  cursor: pointer;
+  background-color: #4779cb;
+  border: 1px solid #060000;
+  border-radius: 5px;
+}
+
+.number-pad button:hover {
+  background-color: #5d89cf;
+}

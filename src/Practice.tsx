@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Heading, Button, Input, Flex, View, Menu, MenuItem, MenuButton, Tabs, ThemeProvider, createTheme, SwitchField, SliderField, Text, StepperField}from '@aws-amplify/ui-react';
 import wordDict from './assets/words_dictionary.json';
 import { HiOutlineArrowSmallUp, HiOutlineArrowSmallDown, HiOutlineArrowSmallLeft, HiOutlineArrowSmallRight } from "react-icons/hi2";
+import NumberPad from './models/numberpadModel';
 
 // Constants
 const COUNTERATTACKPROBABILITY =0.5;
@@ -21,6 +22,8 @@ const Practice = () => {
     // Game State
     const [currentWord, setCurrentWord] = useState('');
     const [userInput, setUserInput] = useState('');
+    const [highlightIndexWord, setHighlightIndexWord] = useState<number>(0);
+    const [incorrectInputIndex, setIncorrectInputIndex] = useState<number | null>(null); // Track incorrect input index
     
 
     // Combat State
@@ -30,7 +33,7 @@ const Practice = () => {
 
     // State for the counterattack settings
     const [counterattackProbability, setCounterattackProbability] = useState(COUNTERATTACKPROBABILITY);
-    const [isCounterattackEnabled, setIsCounterattackEnabled] = useState(true);
+    const [isCounterattackEnabled, setIsCounterattackEnabled] = useState(false);
 
     // State for the length of word setting
     const [wordLength, setWordLength] = useState(31); // Default word length is 31 (all words)
@@ -46,8 +49,12 @@ const Practice = () => {
     const [dodgeRepeats, setDodgeRepeats] = useState(0); // Number of times the sequence should be repeated
     const [curretTab, setCurrentTab] = useState("1");    // The current tab to prevent dodge from running instantly 
 
+    // State for number tab
+    const [currentNumber, setCurrentNumber] = useState('');
+    const [numberLength, setNumberLength] = useState(1);
+    const [highlightIndexNum, setHighlightIndexNum] = useState<number>(0);
 
-
+ 
 
     // Menu Handlers
     const handleMenuOpenChange = (open: boolean) => setIsMenuOpen(open);
@@ -101,6 +108,24 @@ const Practice = () => {
         });
     };
 
+    // Handle the input from the number pad
+    const handleNumberInput = (number: string) => {
+        if (currentNumber[highlightIndexNum] === number) {
+            setHighlightIndexNum((prevIndex) => prevIndex + 1);
+        } 
+        // Check if all digits have been entered
+        if (highlightIndexNum + 1 === currentNumber.length) {
+            alert("Click next to generate new number");
+        }
+        
+    };
+
+    // Handle clearing the entered number
+    const handleClear = () => {
+        setCurrentNumber('');
+        setHighlightIndexNum(0);
+    };
+
     // Combat Handlers
 
     // Start the counterattack and set a timer for the player to dodge
@@ -110,20 +135,43 @@ const Practice = () => {
         generateDodgeSequence(); // Generate dodge sequence
     };
 
-    const handleAttack = () => {
-        if (userInput.trim().toLowerCase() === currentWord.toLowerCase()) { 
-            setUserInput('');
-            pickRandomWord();
 
-            if (Math.random() < counterattackProbability && isCounterattackEnabled) {
-                alert('The boss is counterattacking!');
-                setCounterattackInProgress(true);
-                setDodgeRepeats(1);
-                startCounterattack();
+    const handleWordInput = (chars: string) => {
+        // Check if the last character typed matches the current character to highlight
+        
+        if (chars[chars.length-1] === currentWord[highlightIndexWord] && (incorrectInputIndex === null || userInput.length === 0)){
+            setHighlightIndexWord((prevIndex) => prevIndex + 1);
+            setIncorrectInputIndex(null); // Reset the incorrect input tracking
+        } else {
+            // If the typed character is incorrect, mark it
+            if (incorrectInputIndex === null) {
+                setIncorrectInputIndex(highlightIndexWord); // Mark where the first incorrect input happens
             }
-        } else{
-            alert('Wrong')
-            pickRandomWord();
+        }
+        setUserInput(chars);
+        // Check if the entire word has been typed
+        if (chars === currentWord){
+            handleAttack();
+        }
+    };
+
+    const handleBackspace = () => {
+        // Move the highlight back if needed (only when necessary)
+        if (highlightIndexWord > 0 && (userInput.length-1 === highlightIndexWord || userInput.length === highlightIndexWord)){
+            setHighlightIndexWord((prevIndex) => prevIndex - 1);
+            setIncorrectInputIndex(null); 
+        }
+    };
+
+    const handleAttack = () => {
+        setUserInput('');
+        pickRandomWord();
+        setHighlightIndexWord(0);
+        if (Math.random() < counterattackProbability && isCounterattackEnabled) {
+            alert('The boss is counterattacking!');
+            setCounterattackInProgress(true);
+            setDodgeRepeats(1);
+            startCounterattack();
         }
     };
 
@@ -147,7 +195,7 @@ const Practice = () => {
         });
       };
 
-    const generateDodgeSequence = () => {
+    const   generateDodgeSequence = () => {
         const sequence = Array.from(
             { length: dodgeLength },
             () => DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)]
@@ -195,7 +243,22 @@ const Practice = () => {
         setIsDodging(false);
         setCompletedDodgeCount(dodgeRepeats);  // Reset the completed sequence count
     };
-    
+
+    // Function to generate random digits
+    const generateRandomDigits = () => {
+        let result = '';
+        for (let i = 0; i < numberLength; i++) {
+            result += Math.floor(Math.random() * 10); // Generates a random digit between 0 and 9
+        }
+        return result;
+    };
+
+    // Handle generation of random digits 
+    const handleGenerateDigits = () => {
+        setCurrentNumber(generateRandomDigits());  
+        setHighlightIndexNum(0); // Reset highlight index
+    };
+
     // Effects
     useEffect(() => {
         if (counterattackInProgress) {
@@ -245,7 +308,7 @@ const Practice = () => {
     useEffect(() =>{
         const initialFilteredWords = filterWordsByLength(wordDict as Record<string, number>, wordLength, includeLessThanOrEqual);
         setFilteredWords(initialFilteredWords);
-
+        handleGenerateDigits();
         // Pick a random word after the filteredWords is set
         if (initialFilteredWords.length > 0) {
             setCurrentWord(initialFilteredWords[Math.floor(Math.random() * initialFilteredWords.length)]);
@@ -315,7 +378,7 @@ const Practice = () => {
             </View>
 
             {/* Settings */}
-            <View position="absolute" top="1rem" right="10rem" padding="1rem">
+            <View position="absolute" top="1rem" right="4rem" padding="1rem">
                 
                 <Flex direction="column" gap="1rem" alignItems="center" alignContent="center">
                     {/*  Counterattack Probability Setting*/}
@@ -400,7 +463,24 @@ const Practice = () => {
                         />
 
                     </Flex>
-                    
+
+
+
+                    {/* Number Sequence Length */}
+                    <Flex direction="column" gap="1rem" alignItems="center" alignContent="center">
+                        <Heading level={3}>Number Sequence Length</Heading>
+
+                        <StepperField
+                            label="Number Length"
+                            value={numberLength}
+                            min={1}  
+                            max={20} 
+                            onStepChange={(value) => setNumberLength(value)}
+                            labelHidden={true}
+                            backgroundColor='blue.20'
+                        />
+
+                    </Flex>
                 </Flex>
             </View>
 
@@ -436,15 +516,27 @@ const Practice = () => {
                                     userSelect: 'none', // Disable text selection
                                 }}
                                 >
-                                Input the following word to attack: <strong>{currentWord}</strong>
+                                {currentWord.split('').map((char, index) => (
+                                            <span
+                                                key={index}
+                                                style={{
+                                                fontSize: '24px',
+                                                fontWeight: 'bold',
+                                                color: index === highlightIndexWord ? 'red' : 'black', // Highlight current digit
+                                                opacity: index < highlightIndexWord ? 0.5 : 1, // Fade out the typed digits
+                                                }}
+                                            >
+                                                {char}
+                                            </span>
+                                        ))}
                                 </p>
                                 <Flex direction="row" justifyContent="center" alignItems="center">
                                     <Input
                                         marginTop="-20px"
                                         placeholder="Type the word"
                                         value={userInput}
-                                        onChange={(e) => setUserInput(e.target.value)}
-                                        onKeyDown={(e) => e.key === 'Enter' && handleAttack()}
+                                        onChange={(e) => handleWordInput(e.target.value)}
+                                        onKeyDown={(e) => e.key==="Backspace" && handleBackspace()}
                                         borderColor="black"
                                         backgroundColor='blue.20'
                                     />
@@ -519,8 +611,31 @@ const Practice = () => {
 
                         {/* Numbers Tab */}
                         <Tabs.Panel value="3">
-                            {/* Add content for the Numbers tab here */}
-                            <p>Placeholder for numbers-based game or info</p>
+                            <div>
+                                <Flex direction="column" >
+                                    <Flex direction="row" marginBottom={'-20px'} justifyContent={'center'}>
+                                        {currentNumber.split('').map((digit, index) => (
+                                            <span
+                                                key={index}
+                                                style={{
+                                                fontSize: '24px',
+                                                fontWeight: 'bold',
+                                                color: index === highlightIndexNum ? 'red' : 'black', // Highlight current digit
+                                                opacity: index < highlightIndexNum ? 0.5 : 1, // Fade out the typed digits
+                                                transition: 'color 0.3s ease, opacity 0.3s ease', // Smooth transitions
+                                                }}
+                                            >
+                                                {digit}
+                                            </span>
+                                        ))}
+                                    </Flex>
+                                </Flex>
+                        
+                                    
+
+                                {/* NumberPad component */}
+                                <NumberPad onNumberInput={handleNumberInput} onClear={handleClear} onNext={handleGenerateDigits}/>
+                            </div>
                         </Tabs.Panel>
                     </Tabs.Container>
                 </ThemeProvider>
