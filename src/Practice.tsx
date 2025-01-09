@@ -41,6 +41,12 @@ const Practice = () => {
     const [dodgeLength, setDodgeLength] = useState(DODGE_SEQUENCE_LENGTH); // Default dodge length is 5 
     const [timeLeft, setTimeLeft] = useState(DODGE_TIME_LIMIT); // Default dodge time is 3s 
 
+    // State for dodge sequence repeated count
+    const [completedDodgeCount, setCompletedDodgeCount] = useState(-1); // Track completed sequences
+    const [dodgeRepeats, setDodgeRepeats] = useState(0); // Number of times the sequence should be repeated
+    const [curretTab, setCurrentTab] = useState("1");    // The current tab to prevent dodge from running instantly 
+
+
 
 
     // Menu Handlers
@@ -100,6 +106,7 @@ const Practice = () => {
     // Start the counterattack and set a timer for the player to dodge
     const startCounterattack = () => {
         setCounterattackInProgress(false); // End counterattack phase
+        setDodgeRepeats(1);
         generateDodgeSequence(); // Generate dodge sequence
     };
 
@@ -111,6 +118,7 @@ const Practice = () => {
             if (Math.random() < counterattackProbability && isCounterattackEnabled) {
                 alert('The boss is counterattacking!');
                 setCounterattackInProgress(true);
+                setDodgeRepeats(1);
                 startCounterattack();
             }
         } else{
@@ -121,18 +129,21 @@ const Practice = () => {
 
     const renderDodgeSequence = () => {
         return dodgeSequence.map((direction, index) => {
-          switch (direction) {
-            case 'Up':
-              return <HiOutlineArrowSmallUp key={index} size={24} color= "black"/>;
-            case 'Down':
-              return <HiOutlineArrowSmallDown key={index} size={24} color= "black" />;
-            case 'Left':
-              return <HiOutlineArrowSmallLeft key={index} size={24} color= "black" />;
-            case 'Right':
-              return <HiOutlineArrowSmallRight key={index} size={24} color= "black" />;
-            default:
-              return null;
-          }
+            if(index===0){
+                
+            }
+            switch (direction) {
+                case 'Up':
+                return <HiOutlineArrowSmallUp key={index} size={24} color= "black"/>;
+                case 'Down':
+                return <HiOutlineArrowSmallDown key={index} size={24} color= "black" />;
+                case 'Left':
+                return <HiOutlineArrowSmallLeft key={index} size={24} color= "black" />;
+                case 'Right':
+                return <HiOutlineArrowSmallRight key={index} size={24} color= "black" />;
+                default:
+                return null;
+            }
         });
       };
 
@@ -153,27 +164,38 @@ const Practice = () => {
             setDodgeSequence((prev) => prev.slice(1));
             
             if (dodgeSequence.length === 1) {
-                setIsDodging(false);
-                alert('Dodge successful!');
+                setCompletedDodgeCount((prev) => prev + 1); // Increment completed repetitions
+                if (completedDodgeCount + 1 < dodgeRepeats) {
+                    alert('Dodge successful! Prepare for the next sequence.');
+                    setTimeout(() => generateDodgeSequence(), 1000); // Delay for better flow
+                } else {
+                    alert('All dodge sequences completed successfully!');
+                    setIsDodging(false);
+                }
             }
         } else {
             setIsDodging(false);
-            alert('Dodge failed! Boss counterattack hits you!');
+            alert('Dodge failed!!');
         }
     };
     
     const handleHideRest = (value: string) => {
-        if(value === "2"){
-
-        }
-
+        setCurrentTab(value);
     };
 
-    const handleGenerateNewSequence = () => {
+    const handleGenerateRepeats = () => {
+        if (dodgeRepeats === 0){
+            return;
+        }
+        setCompletedDodgeCount(0); // Resets the completed dodge count
         generateDodgeSequence();
     };
-    
 
+    const handleQuit = () => {
+        setIsDodging(false);
+        setCompletedDodgeCount(dodgeRepeats);  // Reset the completed sequence count
+    };
+    
     // Effects
     useEffect(() => {
         if (counterattackInProgress) {
@@ -203,6 +225,12 @@ const Practice = () => {
     }, [isDodging, dodgeSequence]);
 
     useEffect(() => {
+        if (!isDodging && (completedDodgeCount  < dodgeRepeats) && curretTab === "2"){
+            generateDodgeSequence();
+        } 
+    }, [isDodging]);
+
+    useEffect(() => {
         if (isDodging && timeLeft > 0) {
             const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
             return () => clearInterval(timer);
@@ -215,13 +243,23 @@ const Practice = () => {
     }, [isDodging, timeLeft]);
 
     useEffect(() =>{
-        pickRandomWord();
+        const initialFilteredWords = filterWordsByLength(wordDict as Record<string, number>, wordLength, includeLessThanOrEqual);
+        setFilteredWords(initialFilteredWords);
+
+        // Pick a random word after the filteredWords is set
+        if (initialFilteredWords.length > 0) {
+            setCurrentWord(initialFilteredWords[Math.floor(Math.random() * initialFilteredWords.length)]);
+        }
     }, []);
 
     useEffect(() => {
-        // Whenever word length changes, filter words by the new length
-        setFilteredWords(filterWordsByLength(wordDict as Record<string,number>, wordLength, includeLessThanOrEqual));
-        pickRandomWord();
+        // Whenever wordLength or includeLessThanOrEqual changes, update filteredWords and pick a new word
+        const updatedFilteredWords = filterWordsByLength(wordDict as Record<string, number>, wordLength, includeLessThanOrEqual);
+        setFilteredWords(updatedFilteredWords);
+
+        if (updatedFilteredWords.length > 0) {
+            setCurrentWord(updatedFilteredWords[Math.floor(Math.random() * updatedFilteredWords.length)]);
+        }
     }, [wordLength,includeLessThanOrEqual]);
 
     // Theme
@@ -429,25 +467,52 @@ const Practice = () => {
                             {/* Display the dodge sequence */}
                             <Flex direction="column" alignItems="center">
                                 {isDodging && (
-                                    <div>   
-                                        <p>Follow the sequence to dodge:</p>
-                                        <Flex direction="row" gap="1rem" justifyContent="center">
-                                        {renderDodgeSequence()}
+                                    <div>
+                                        <Flex direction="row" justifyContent="center">
+                                            <Heading level={3}>
+                                                Round: {completedDodgeCount + 1} of {dodgeRepeats}
+                                            </Heading>   
                                         </Flex>
-                                        <p>Time left to dodge: {timeLeft} seconds</p>
+                                        <Flex direction="row" margin='20px' justifyContent="center">
+                                            <Heading level={5}>
+                                                Follow the sequence to dodge:
+                                            </Heading>
+                                        </Flex>
+
+                                        
+                                        <Flex direction="row" gap="1rem" justifyContent="center">
+                                            {renderDodgeSequence()}
+                                        </Flex>
+                                        <Flex direction="row"  marginTop='20px' justifyContent="center">
+                                            <Heading level={5}>
+                                                Time left to dodge: {timeLeft} seconds
+                                            </Heading>
+                                        </Flex>
+                                        <Flex direction="row" margin='20px' justifyContent="center">
+                                            <Button variation='destructive' onClick={handleQuit}> 
+                                                Stop
+                                            </Button>
+                                        </Flex>
                                     </div>
                                 )}
-                                <Flex direction="row" alignContent={"center"} alignItems={'center'}>
-                                    <Input
-                                            marginTop="20px"
-                                            placeholder="Press Enter in this Box"
-                                            value={userInput}
-                                            onChange={(e) => setUserInput(e.target.value)}
-                                            onKeyDown={(e) => e.key === 'Enter' && handleGenerateNewSequence()}
-                                            borderColor="black"
-                                            backgroundColor='blue.20'
-                                        />
-                                </Flex>
+                                {!isDodging && (
+                                    <Flex direction="column" alignItems="center">
+                                        <Flex direction="row" marginBottom={'-20px'} justifyContent="center">
+                                            <p>
+                                                Enter the desired number of dodges:
+                                            </p>
+                                        </Flex>
+                                        <Flex direction="row" alignContent={"center"} alignItems={'center'}>
+                                            <Input
+                                                    value={dodgeRepeats}
+                                                    onChange={(e) => setDodgeRepeats(parseInt(e.target.value || "0", 10))}
+                                                    onKeyDown={(e) => e.key === 'Enter' && handleGenerateRepeats()}
+                                                    borderColor="black"
+                                                    backgroundColor='blue.20'
+                                                />
+                                        </Flex>
+                                    </Flex>
+                                )}
                             </Flex>
                             
                         </Tabs.Panel>
