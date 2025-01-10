@@ -30,6 +30,8 @@ const Practice = () => {
     const [counterattackInProgress, setCounterattackInProgress] = useState(false);
     const [dodgeSequence, setDodgeSequence] = useState<Direction[]>([]);
     const [isDodging, setIsDodging] = useState(false);
+    const [wordScore, setWordScore] = useState(0);
+
 
     // State for the counterattack settings
     const [counterattackProbability, setCounterattackProbability] = useState(COUNTERATTACKPROBABILITY);
@@ -47,12 +49,15 @@ const Practice = () => {
     // State for dodge sequence repeated count
     const [completedDodgeCount, setCompletedDodgeCount] = useState(-1); // Track completed sequences
     const [dodgeRepeats, setDodgeRepeats] = useState(0); // Number of times the sequence should be repeated
-    const [curretTab, setCurrentTab] = useState("1");    // The current tab to prevent dodge from running instantly 
+    const [curretTab, setCurrentTab] = useState("1");    // The current tab to prevent dodge from running instantly
+    const [dodgeScore, setDodgeScore] = useState(0);
+ 
 
     // State for number tab
     const [currentNumber, setCurrentNumber] = useState('');
-    const [numberLength, setNumberLength] = useState(1);
+    const [numberLength, setNumberLength] = useState(5);
     const [highlightIndexNum, setHighlightIndexNum] = useState<number>(0);
+    const [numScore, setNumScore] = useState(0);
 
  
 
@@ -112,10 +117,13 @@ const Practice = () => {
     const handleNumberInput = (number: string) => {
         if (currentNumber[highlightIndexNum] === number) {
             setHighlightIndexNum((prevIndex) => prevIndex + 1);
-        } 
+        } else {
+            setNumScore(0);
+        }
         // Check if all digits have been entered
         if (highlightIndexNum + 1 === currentNumber.length) {
-            alert("Click next to generate new number");
+            handleGenerateDigits();
+            setNumScore((prevScore) => prevScore + 1);
         }
         
     };
@@ -137,26 +145,29 @@ const Practice = () => {
 
 
     const handleWordInput = (chars: string) => {
-        // Check if the last character typed matches the current character to highlight
-        
-        if (chars[chars.length-1] === currentWord[highlightIndexWord] && (incorrectInputIndex === null || userInput.length === 0)){
+        // Check if the last character typed matches the current character to highlight 
+        // 1: Checks if there are incorrect inputs if correct character inputted
+        // 2: Ensures when blank, the highlight moves if correct character inputted
+        // 3: Ensures after backspacing, the highlight moves if correct character inputted
+        if (chars[chars.length-1] === currentWord[highlightIndexWord] && (incorrectInputIndex === null || userInput.length === 0 || userInput.length=== highlightIndexWord)){
             setHighlightIndexWord((prevIndex) => prevIndex + 1);
             setIncorrectInputIndex(null); // Reset the incorrect input tracking
         } else {
-            // If the typed character is incorrect, mark it
+            // If the typed character is incorrect, mark it with the index
             if (incorrectInputIndex === null) {
-                setIncorrectInputIndex(highlightIndexWord); // Mark where the first incorrect input happens
+                setIncorrectInputIndex(highlightIndexWord); 
             }
         }
         setUserInput(chars);
-        // Check if the entire word has been typed
+        // Check if the entire word has been typed (ensures user wont be softlocked in case of highlight bug)
         if (chars === currentWord){
             handleAttack();
+            setWordScore((prevScore) => prevScore + 1);
         }
     };
 
     const handleBackspace = () => {
-        // Move the highlight back if needed (only when necessary)
+        // Move the highlight back if needed 
         if (highlightIndexWord > 0 && (userInput.length-1 === highlightIndexWord || userInput.length === highlightIndexWord)){
             setHighlightIndexWord((prevIndex) => prevIndex - 1);
             setIncorrectInputIndex(null); 
@@ -195,7 +206,7 @@ const Practice = () => {
         });
       };
 
-    const   generateDodgeSequence = () => {
+    const generateDodgeSequence = () => {
         const sequence = Array.from(
             { length: dodgeLength },
             () => DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)]
@@ -213,6 +224,7 @@ const Practice = () => {
             
             if (dodgeSequence.length === 1) {
                 setCompletedDodgeCount((prev) => prev + 1); // Increment completed repetitions
+                setDodgeScore((prevScore) => prevScore + 1);
                 if (completedDodgeCount + 1 < dodgeRepeats) {
                     alert('Dodge successful! Prepare for the next sequence.');
                     setTimeout(() => generateDodgeSequence(), 1000); // Delay for better flow
@@ -222,6 +234,7 @@ const Practice = () => {
                 }
             }
         } else {
+            setDodgeScore(0);
             setIsDodging(false);
             alert('Dodge failed!!');
         }
@@ -325,6 +338,10 @@ const Practice = () => {
         }
     }, [wordLength,includeLessThanOrEqual]);
 
+    useEffect(() => {
+        setWordScore(0);
+    }, [incorrectInputIndex]);
+
     // Theme
     const theme = createTheme({
         name: 'tabs-theme',
@@ -357,7 +374,7 @@ const Practice = () => {
             },
           },
         },
-      });
+    });
 
     // Render
     return (
@@ -511,6 +528,11 @@ const Practice = () => {
                         {/* Words Tab */}
                         <Tabs.Panel value="1" >
                             <Flex direction="column" alignItems="center">
+                                <Flex direction="row" marginBottom="-25px" justifyContent="center" alignItems="center">
+                                    <Text>
+                                        Score: {wordScore}
+                                    </Text>
+                                </Flex>
                                 <p 
                                 style={{
                                     userSelect: 'none', // Disable text selection
@@ -522,7 +544,7 @@ const Practice = () => {
                                                 style={{
                                                 fontSize: '24px',
                                                 fontWeight: 'bold',
-                                                color: index === highlightIndexWord ? 'red' : 'black', // Highlight current digit
+                                                color: index === highlightIndexWord ? ( incorrectInputIndex === highlightIndexWord ?'red' : 'green'): 'black', // Highlight current digit
                                                 opacity: index < highlightIndexWord ? 0.5 : 1, // Fade out the typed digits
                                                 }}
                                             >
@@ -562,8 +584,13 @@ const Practice = () => {
                                     <div>
                                         <Flex direction="row" justifyContent="center">
                                             <Heading level={3}>
-                                                Round: {completedDodgeCount + 1} of {dodgeRepeats}
+                                                Round: {completedDodgeCount + 1} of {dodgeRepeats} 
                                             </Heading>   
+                                        </Flex>
+                                        <Flex direction="row" margin='20px' justifyContent="center">
+                                            <Heading>
+                                                Score: {dodgeScore}
+                                            </Heading>
                                         </Flex>
                                         <Flex direction="row" margin='20px' justifyContent="center">
                                             <Heading level={5}>
@@ -576,8 +603,8 @@ const Practice = () => {
                                             {renderDodgeSequence()}
                                         </Flex>
                                         <Flex direction="row"  marginTop='20px' justifyContent="center">
-                                            <Heading level={5}>
-                                                Time left to dodge: {timeLeft} seconds
+                                            <Heading level={5} color={'red'}>
+                                                {timeLeft} 
                                             </Heading>
                                         </Flex>
                                         <Flex direction="row" margin='20px' justifyContent="center">
@@ -613,6 +640,11 @@ const Practice = () => {
                         <Tabs.Panel value="3">
                             <div>
                                 <Flex direction="column" >
+                                    <Flex direction="row" marginBottom={'-15px'} justifyContent={'center'}>
+                                        <Text>
+                                            Score: {numScore}
+                                        </Text>
+                                    </Flex>
                                     <Flex direction="row" marginBottom={'-20px'} justifyContent={'center'}>
                                         {currentNumber.split('').map((digit, index) => (
                                             <span
