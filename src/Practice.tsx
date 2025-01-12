@@ -59,6 +59,11 @@ const Practice = () => {
     const [highlightIndexNum, setHighlightIndexNum] = useState<number>(0);
     const [numScore, setNumScore] = useState(0);
 
+    // States for handling hiding settings based on tab
+    const [showWordSettings, setShowWordSettings] = useState(true);
+    const [showDodgeSettings, setShowDodgeSettings] = useState(false);
+    const [showCounterSettings, setShowCounterSettings] = useState(true);
+    const [showNumberSettings, setShowNumberSettings] = useState(false);
  
 
     // Menu Handlers
@@ -72,6 +77,7 @@ const Practice = () => {
     // Handler for Switch Change
     const handleCounterChange = (checked: boolean) => {
         setIsCounterattackEnabled(checked);
+        setShowDodgeSettings(checked);
     };
 
     // Handler for Slider Change
@@ -242,6 +248,11 @@ const Practice = () => {
     
     const handleHideRest = (value: string) => {
         setCurrentTab(value);
+        setCurrentTab(value);
+        setShowWordSettings(value === "1");
+        setShowDodgeSettings(value === "1" || value === "2");
+        setShowNumberSettings(value === "3");
+        setShowCounterSettings(value === "1");
     };
 
     const handleGenerateRepeats = () => {
@@ -395,109 +406,107 @@ const Practice = () => {
             </View>
 
             {/* Settings */}
-            <View position="absolute" top="1rem" right="4rem" padding="1rem">
+            <View position="absolute" top="7rem" right="4rem" padding="1rem">
                 
                 <Flex direction="column" gap="1rem" alignItems="center" alignContent="center">
                     {/*  Counterattack Probability Setting*/}
-                    <Flex direction="column" gap="1rem" alignItems="center" alignContent="center">
-                        <Heading level={3}>Counterattack Probability</Heading>
-                        <SliderField
-                                label="counterAttackProbability"
-                                value={counterattackProbability*100}  // Convert back to percentage (0-100)
-                                onChange={(value) => handleSliderCounterChange(value)}
-                                min={0}
-                                max={100}
-                                step={1}
-                                isValueHidden={true}
-                                labelHidden={true}
-                                isDisabled={!isCounterattackEnabled}
-                            />
-                        <Flex direction="row" gap="1rem" justifyContent="center" alignContent="center">
-                            <Text>{`Probability: ${(counterattackProbability*100).toFixed(0)}%`}</Text>
+                    {showCounterSettings && (
+                        <Flex direction="column" marginBottom='50px' gap="1rem" alignItems="center" alignContent="center">
+                            <Heading level={3}>Counterattack Probability</Heading>
+                            <SliderField
+                                    label="counterAttackProbability"
+                                    value={counterattackProbability*100}  // Convert back to percentage (0-100)
+                                    onChange={(value) => handleSliderCounterChange(value)}
+                                    min={0}
+                                    max={100}
+                                    step={1}
+                                    isValueHidden={true}
+                                    labelHidden={true}
+                                    isDisabled={!isCounterattackEnabled}
+                                />
+                            <Flex direction="row" gap="1rem" justifyContent="center" alignContent="center">
+                                <Text>{`Probability: ${(counterattackProbability*100).toFixed(0)}%`}</Text>
+                            </Flex>
+                        
+                            <Flex direction="row" gap="1rem" alignItems="center">
+                                <Text>Enable Counterattack</Text>
+                                <SwitchField 
+                                    label ="isCounterAttackENabled"
+                                    isLabelHidden={true}
+                                    isChecked={isCounterattackEnabled} 
+                                    onChange={(e) => handleCounterChange(e.target.checked)} 
+                                />
+                            </Flex>
                         </Flex>
-                    
-                        <Flex direction="row" gap="1rem" alignItems="center">
-                            <Text>Enable Counterattack</Text>
-                            <SwitchField 
-                                label ="isCounterAttackENabled"
-                                isLabelHidden={true}
-                                isChecked={isCounterattackEnabled} 
-                                onChange={(e) => handleCounterChange(e.target.checked)} 
-                            />
-                        </Flex>
-                    </Flex>
-                    
-
+                    )}
 
                     {/* Word Length Setting */}
-                    <Flex direction="column" gap="1rem" alignItems="center" alignContent="center">
-                        <Heading level={3}>Word Length</Heading>
-
-                        <StepperField
-                            label="Word Length"
-                            value={wordLength}
-                            min={1}  
-                            max={31} 
-                            onStepChange={(value) => handleWordLengthStepperChange(value)}
-                            labelHidden={true}
-                            backgroundColor='blue.20'
-                        />
-
-                        {/* Toggle for Filter Type */}
-                        <Flex direction="row" gap="1rem" alignItems="center">
-                            <Text>Condition: </Text>
-                            <SwitchField
-                                label="Include Less Than or Equal Length"
-                                isLabelHidden={true}
-                                isChecked={includeLessThanOrEqual}
-                                onChange={(e) => handleIncludeLessThanOrEqualChange(e.target.checked)}
+                    {showWordSettings && (
+                        <Flex direction="column" gap="1rem" marginBottom='40px' alignItems="center" alignContent="center">
+                            <Heading level={3}>Word Length</Heading>
+                            <StepperField
+                                label="Word Length"
+                                value={wordLength}
+                                min={1}
+                                max={31}
+                                onStepChange={(value) => handleWordLengthStepperChange(value)}
+                                labelHidden
+                                backgroundColor="blue.20"
                             />
-                            <Text>{includeLessThanOrEqual ? "Less Than or Equal" : "Exact Length"}</Text>
+                            {/* Toggle for Filter Type */}
+                            <Flex direction="row" gap="1rem" alignItems="center">
+                                <Text>Condition: </Text>
+                                <SwitchField
+                                    label="Include Less Than or Equal Length"
+                                    isLabelHidden
+                                    isChecked={includeLessThanOrEqual}
+                                    onChange={(e) => handleIncludeLessThanOrEqualChange(e.target.checked)}
+                                />
+                                <Text>{includeLessThanOrEqual ? "Less Than or Equal" : "Exact Length"}</Text>
+                            </Flex>
+                            <p>
+                                {filteredWords.length === 0 ? (
+                                    <Text>No words found for this length.</Text>
+                                ) : (
+                                    <Text>
+                                        Number of words: <strong>{filteredWords.length}</strong>
+                                    </Text>
+                                )}
+                            </p>
                         </Flex>
-                        <p>
-                            {filteredWords.length === 0 ? (
-                                <Text>No words found for this length.</Text>
-                            ) : (
-                                <Text>Number of words: <strong>{filteredWords.length}</strong></Text>
-                            )}
-                        </p>
-                    </Flex>
+                    )}
 
-
-
-                    {/* Dodge Sequence Length */}
-                    <Flex direction="column" gap="1rem" alignItems="center" alignContent="center">
-                        <Heading level={3}>Dodge Sequence Length</Heading>
-
-                        <StepperField
-                            label="Dodge Length"
-                            value={dodgeLength}
-                            min={1}  
-                            max={40} 
-                            onStepChange={(value) => handleDodgeLengthStepperChange(value)}
-                            labelHidden={true}
-                            backgroundColor='blue.20'
-                        />
-
-                    </Flex>
-
-
+                    {/* Dodge Settings */}
+                    {showDodgeSettings && (
+                        <Flex direction="column" marginBottom='0px' gap="1rem" alignItems="center" alignContent="center">
+                            <Heading level={3}>Dodge Sequence Length</Heading>
+                            <StepperField
+                                label="Dodge Length"
+                                value={dodgeLength}
+                                min={1}
+                                max={40}
+                                onStepChange={(value) => handleDodgeLengthStepperChange(value)}
+                                labelHidden
+                                backgroundColor="blue.20"
+                            />
+                        </Flex>
+                    )}
 
                     {/* Number Sequence Length */}
-                    <Flex direction="column" gap="1rem" alignItems="center" alignContent="center">
-                        <Heading level={3}>Number Sequence Length</Heading>
-
-                        <StepperField
-                            label="Number Length"
-                            value={numberLength}
-                            min={1}  
-                            max={20} 
-                            onStepChange={(value) => setNumberLength(value)}
-                            labelHidden={true}
-                            backgroundColor='blue.20'
-                        />
-
-                    </Flex>
+                    {showNumberSettings && (
+                        <Flex direction="column" gap="1rem" alignItems="center" alignContent="center">
+                            <Heading level={3}>Number Sequence Length</Heading>
+                            <StepperField
+                                label="Number Length"
+                                value={numberLength}
+                                min={1}
+                                max={20}
+                                onStepChange={(value) => setNumberLength(value)}
+                                labelHidden
+                                backgroundColor="blue.20"
+                            />
+                        </Flex>
+                    )}  
                 </Flex>
             </View>
 
@@ -520,9 +529,9 @@ const Practice = () => {
                         
                         {/* List of tabs */}
                         <Tabs.List spacing='equal' >
-                            <Tabs.Item value="1" minWidth="180px">Words</Tabs.Item>
+                            <Tabs.Item value="1" minWidth="180px" onClick={() => handleHideRest("1")} >Words</Tabs.Item>
                             <Tabs.Item value="2" minWidth="180px" onClick={() => handleHideRest("2")} >Dodge</Tabs.Item>
-                            <Tabs.Item value="3" minWidth="180px">Numbers</Tabs.Item>
+                            <Tabs.Item value="3" minWidth="180px" onClick={() => handleHideRest("3")}>Numbers</Tabs.Item>
                         </Tabs.List>
 
                         {/* Words Tab */}
