@@ -6,7 +6,14 @@ import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import  MainMenu  from "./MainMenu"; 
-import GamePlay from "./GamePlay"; // Import your GamePlay component
+import GamePlay from "./Gameplay"; 
+import PathSelection from "./pathSelection";
+import Leaderboards from "./Leaderboards";
+import NameCreation from "./nameCreation";
+import Trading from "./trading";
+import './index.css';
+import Practice from "./Practice";
+import Settings from "./Settings";
 
 Amplify.configure(outputs);
 
@@ -16,7 +23,14 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <Router>
         <Routes>
           <Route path="/" element={<MainMenu />} /> {/* Route for main menu */}
-          <Route path="/gameplay" element={<GamePlay />} /> {/* Route for gameplay */}
+          <Route path="/namecreation" element={<NameCreation />} /> {/* Route for name creation*/}
+          <Route path="/pathselection/:defeatedBossCount" element={<PathSelection/>} /> {/* Route for path selection */}
+          <Route path="/gameplay/:pathId/:defeatedBossCount" element={<GamePlay />} /> {/* Route for gameplay */}
+          <Route path="/leaderboards"  element={<Leaderboards />} />  {/* Route for leaderboards*/}
+          <Route path="/trading/:pathId/:defeatedBossCount" element={<Trading />} /> {/*Route for trading*/}
+          <Route path="/practice" element={<Practice />} /> {/*Route for practice mode*/}
+          <Route path="/settings" element={<Settings />} /> {/*Route to settings*/}
+          
         </Routes>
       </Router>
     </Authenticator>

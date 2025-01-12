@@ -15,6 +15,10 @@ main {
   align-items: stretch;
 }
 
+.amplify-dropzone {
+  background: linear-gradient(180deg, rgb(157, 114, 251),rgb(183, 159, 236) );;
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -62,4 +66,43 @@ li:hover {
 a {
   font-weight: 800;
   text-decoration: none;
+} 
+
+.number-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  min-width: 200px;
+  margin-top: 20px
+}
+
+.number-pad button {
+  font-size: 24px;
+  padding: 5px;
+  cursor: pointer;
+  background-color: #4779cb;
+  border: 1px solid #060000;
+  border-radius: 5px;
+}
+
+.number-pad button:hover {
+  background-color: #5d89cf;
+}
+
+@keyframes flameAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 50% 30%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  75% {
+    background-position: 75% 70%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
