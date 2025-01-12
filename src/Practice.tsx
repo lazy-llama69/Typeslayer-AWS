@@ -250,7 +250,7 @@ const Practice = () => {
         setCurrentTab(value);
         setCurrentTab(value);
         setShowWordSettings(value === "1");
-        setShowDodgeSettings(value === "1" || value === "2");
+        setShowDodgeSettings(value === "2");
         setShowNumberSettings(value === "3");
         setShowCounterSettings(value === "1");
     };
@@ -411,22 +411,23 @@ const Practice = () => {
                 <Flex direction="column" gap="1rem" alignItems="center" alignContent="center">
                     {/*  Counterattack Probability Setting*/}
                     {showCounterSettings && (
-                        <Flex direction="column" marginBottom='50px' gap="1rem" alignItems="center" alignContent="center">
+                        <Flex direction="column" marginBottom='40px' gap="1rem" alignItems="center" alignContent="center">
                             <Heading level={3}>Counterattack Probability</Heading>
-                            <SliderField
-                                    label="counterAttackProbability"
-                                    value={counterattackProbability*100}  // Convert back to percentage (0-100)
-                                    onChange={(value) => handleSliderCounterChange(value)}
-                                    min={0}
-                                    max={100}
-                                    step={1}
-                                    isValueHidden={true}
-                                    labelHidden={true}
-                                    isDisabled={!isCounterattackEnabled}
-                                />
-                            <Flex direction="row" gap="1rem" justifyContent="center" alignContent="center">
-                                <Text>{`Probability: ${(counterattackProbability*100).toFixed(0)}%`}</Text>
+                            <Flex direction="row" gap="1rem" alignItems="center">
+                                <SliderField
+                                        label="counterAttackProbability"
+                                        value={counterattackProbability*100}  // Convert back to percentage (0-100)
+                                        onChange={(value) => handleSliderCounterChange(value)}
+                                        min={0}
+                                        max={100}
+                                        step={1}
+                                        isValueHidden={true}
+                                        labelHidden={true}
+                                        isDisabled={!isCounterattackEnabled}
+                                    />
+                                <Text>{`${(counterattackProbability*100).toFixed(0)}%`}</Text>
                             </Flex>
+                            
                         
                             <Flex direction="row" gap="1rem" alignItems="center">
                                 <Text>Enable Counterattack</Text>
@@ -435,8 +436,25 @@ const Practice = () => {
                                     isLabelHidden={true}
                                     isChecked={isCounterattackEnabled} 
                                     onChange={(e) => handleCounterChange(e.target.checked)} 
+                                    fontSize='25px'
                                 />
                             </Flex>
+                        </Flex>
+                    )}
+
+                    {/* Dodge Settings */}
+                    {showDodgeSettings && (
+                        <Flex direction="column" marginBottom='40px' gap="1rem" alignItems="center" alignContent="center">
+                            <Heading level={3}>Dodge Sequence Length</Heading>
+                            <StepperField
+                                label="Dodge Length"
+                                value={dodgeLength}
+                                min={1}
+                                max={40}
+                                onStepChange={(value) => handleDodgeLengthStepperChange(value)}
+                                labelHidden
+                                backgroundColor="blue.20"
+                            />
                         </Flex>
                     )}
 
@@ -461,6 +479,7 @@ const Practice = () => {
                                     isLabelHidden
                                     isChecked={includeLessThanOrEqual}
                                     onChange={(e) => handleIncludeLessThanOrEqualChange(e.target.checked)}
+                                    fontSize='25px'
                                 />
                                 <Text>{includeLessThanOrEqual ? "Less Than or Equal" : "Exact Length"}</Text>
                             </Flex>
@@ -476,25 +495,9 @@ const Practice = () => {
                         </Flex>
                     )}
 
-                    {/* Dodge Settings */}
-                    {showDodgeSettings && (
-                        <Flex direction="column" marginBottom='0px' gap="1rem" alignItems="center" alignContent="center">
-                            <Heading level={3}>Dodge Sequence Length</Heading>
-                            <StepperField
-                                label="Dodge Length"
-                                value={dodgeLength}
-                                min={1}
-                                max={40}
-                                onStepChange={(value) => handleDodgeLengthStepperChange(value)}
-                                labelHidden
-                                backgroundColor="blue.20"
-                            />
-                        </Flex>
-                    )}
-
                     {/* Number Sequence Length */}
                     {showNumberSettings && (
-                        <Flex direction="column" gap="1rem" alignItems="center" alignContent="center">
+                        <Flex direction="column" marginTop='15rem' gap="1rem" alignItems="center" alignContent="center">
                             <Heading level={3}>Number Sequence Length</Heading>
                             <StepperField
                                 label="Number Length"
