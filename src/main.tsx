@@ -6,7 +6,7 @@ import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import  MainMenu  from "./MainMenu"; 
-import GamePlay from "./Gameplay"; 
+import GamePlay from "./GamePlay"; 
 import PathSelection from "./pathSelection";
 import Leaderboards from "./Leaderboards";
 import NameCreation from "./nameCreation";
