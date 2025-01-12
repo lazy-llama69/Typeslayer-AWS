@@ -22,7 +22,7 @@ const MainMenu = () => {
 
     const handleSettings = () => {
         console.log('Opening settings...');
-        // Implement settings logic here
+        navigate('/settings')
     };
 
     const handlePractice = () => {
@@ -131,8 +131,8 @@ const MainMenu = () => {
                     onClick={handleSettings}
                     style={{
                         cursor: 'pointer',
-                        backgroundColor: '#e2e3e5', // Light gray for a disabled look
-                        color: '#6c757d', // Dark gray for contrast
+                        backgroundColor: '#f0f4f8 ', // Light gray for a disabled look
+                        color: '#2c3e50 ', // Dark gray for contrast
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
