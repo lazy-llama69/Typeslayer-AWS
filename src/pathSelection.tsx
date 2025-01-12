@@ -6,6 +6,7 @@ import forestCabin from '/assets/paths/forest_cabin.jpg';
 import ybr from '/assets/paths/yellowbrickroad.jpg';
 import shop from '/assets/paths/shop.jpg';
 import haunted_castle from '/assets/paths/haunted_castle.png'
+import { FaArrowRight } from "react-icons/fa";
 
 
 
@@ -133,7 +134,7 @@ const PathSelection = () => {
                         >
                             {text}
                         </Breadcrumbs.Link>
-                        {idx !== breadcrumbs.length - 1 && <Breadcrumbs.Separator />} {/* Add separator except for the last item */}
+                        {idx !== breadcrumbs.length - 1 && <FaArrowRight color= "pink" size="25px"/>} {/* Add separator except for the last item */}
                     </Breadcrumbs.Item>
                 ))}
             </Breadcrumbs.Container>

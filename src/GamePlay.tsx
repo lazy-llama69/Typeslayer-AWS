@@ -32,6 +32,10 @@ const GamePlay = () => {
   const [selectedPotion, setSelectedPotion] = useState<string | null>(null); //Default value
   const [isInitialized, setIsInitialized] = useState(false);   
   const [avatarImage, setAvatarImage] = useState<string>();
+  const [highlightIndexWord, setHighlightIndexWord] = useState<number>(0);
+  const [incorrectInputIndex, setIncorrectInputIndex] = useState<number | null>(null); // Track incorrect input index
+
+
 
   useEffect(() => {
     if (counterattackInProgress) {
@@ -228,9 +232,10 @@ const GamePlay = () => {
   };
 
   // Handle the attack logic
-  const handleAttack = () => {
-    if (userInput.trim().toLowerCase() === currentWord.toLowerCase()) {
+  const handleAttack = (bool: boolean) => {
+    if (bool) {
       setUserInput(''); // Clear the input after attack
+      setHighlightIndexWord(0);
       setBoss((prevBoss) => {
         if (!prevBoss) return null;
         const damageToBoss = player?.damage || 0;
@@ -264,6 +269,35 @@ const GamePlay = () => {
         } as BossModel;
       });
     }
+  };
+
+  const handleWordInput = (chars: string) => {
+      // Check if the last character typed matches the current character to highlight 
+      // 1: Checks if there are incorrect inputs if correct character inputted
+      // 2: Ensures when blank, the highlight moves if correct character inputted
+      // 3: Ensures after backspacing, the highlight moves if correct character inputted
+      if (chars[chars.length-1] === currentWord[highlightIndexWord] && (incorrectInputIndex === null || userInput.length === 0 || userInput.length=== highlightIndexWord)){
+          setHighlightIndexWord((prevIndex) => prevIndex + 1);
+          setIncorrectInputIndex(null); // Reset the incorrect input tracking
+      } else {
+          // If the typed character is incorrect, mark it with the index
+          if (incorrectInputIndex === null) {
+              setIncorrectInputIndex(highlightIndexWord); 
+          }
+      }
+      setUserInput(chars);
+      // Check if the entire word has been typed (ensures user wont be softlocked in case of highlight bug)
+      if (chars === currentWord){
+          handleAttack(true);
+      }
+  };
+
+  const handleBackspace = () => {
+      // Move the highlight back if needed 
+      if (highlightIndexWord > 0 && (userInput.length-1 === highlightIndexWord || userInput.length === highlightIndexWord)){
+          setHighlightIndexWord((prevIndex) => prevIndex - 1);
+          setIncorrectInputIndex(null); 
+      }
   };
 
   // Generate a random dodge sequence
@@ -539,10 +573,10 @@ const GamePlay = () => {
             onChange={handleEquipmentChange} // Call handler on change
           >
             {player?.inventory
-                .filter((item) => item.type === 'armor')  // Assuming each item has a 'type' property
-                .map((weapon) => (
-                  <Radio key={weapon.id} value={weapon.id}>
-                    {weapon.name} {/* Assuming each weapon has a 'name' property */}
+                .filter((item) => item.type === 'armor')  
+                .map((armor) => (
+                  <Radio key={armor.id} value={armor.id}>
+                    {armor.name} 
                   </Radio>
                 ))}
           </RadioGroupField>
@@ -559,10 +593,10 @@ const GamePlay = () => {
             onChange={handlePotionChosen} // Call handler on change
           >
             {player?.inventory
-                .filter((item) => item.type === 'potion')  // Assuming each item has a 'type' property
-                .map((weapon) => (
-                  <Radio key={weapon.id} value={weapon.id}>
-                    {weapon.name} {/* Assuming each weapon has a 'name' property */}
+                .filter((item) => item.type === 'potion')  
+                .map((potion) => (
+                  <Radio key={potion.id} value={potion.id}>
+                    {potion.name} 
                   </Radio>
                 ))}
           </RadioGroupField>
@@ -653,19 +687,36 @@ const GamePlay = () => {
             
       {/* Bottom section */}
             {/* Word Input and Attack Section */}
-            <Flex direction="column" gap="0.5rem" alignItems="center">
-              <p>Input the following word to attack: <strong>{currentWord}</strong></p>
+            <Flex direction="column" marginTop='-20px' gap="0.5rem" alignItems="center">
+              <p 
+                style={{
+                    userSelect: 'none', // Disable text selection
+                }}
+                >
+                {currentWord.split('').map((char, index) => (
+                            <span
+                                key={index}
+                                style={{
+                                fontSize: '24px',
+                                fontWeight: 'bold',
+                                color: index === highlightIndexWord ? ( incorrectInputIndex === highlightIndexWord ?'red' : 'green'): 'black', // Highlight current digit
+                                opacity: index < highlightIndexWord ? 0.5 : 1, // Fade out the typed digits
+                                }}
+                            >
+                                {char}
+                            </span>
+                        ))}
+                </p>
               
               <Flex direction="row" gap="0.5rem" justifyContent="center" alignItems="center">
                 <Input
-                  placeholder={`Type the word`}
-                  value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleAttack(); // Trigger attack on Enter key press
-                    }
-                  }}
+                    marginTop="-15px"
+                    placeholder="Type the word"
+                    value={userInput}
+                    onChange={(e) => handleWordInput(e.target.value)}
+                    onKeyDown={(e) => e.key==="Backspace" && handleBackspace()}
+                    borderColor="black"
+                    backgroundColor='blue.20'
                 />
               </Flex>
             </Flex>
