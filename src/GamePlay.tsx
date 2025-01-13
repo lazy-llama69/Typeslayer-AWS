@@ -6,13 +6,15 @@ import { Button, Input, Flex, Heading, View, Breadcrumbs, ThemeProvider, createT
 import { IoIosHeart } from "react-icons/io";
 import { MdHeartBroken } from "react-icons/md";
 import { HiOutlineArrowSmallUp, HiOutlineArrowSmallDown, HiOutlineArrowSmallLeft, HiOutlineArrowSmallRight } from "react-icons/hi2";
-import wordDict from './assets/words_dictionary.json'; 
 import axios from 'axios';
 import { GiPotionBall, GiCrossedSwords, GiShoulderArmor } from "react-icons/gi";
 import { FaArrowRight } from "react-icons/fa";
 
   
 const GamePlay = () => {
+  const [wordDict, setWordDict] = useState<Record<string, number>>({});
+  const wordDictUrl = 'https://typerslayer-music.s3.ap-southeast-2.amazonaws.com/words_dictionary.json';
+  const [loading, setLoading] = useState<boolean>(true); // Loading state to track if the wordDict is fetched
   const {pathId, defeatedBossCount: totalDefeatedBossCount } = useParams();
   const [player, setPlayer] = useState<PlayerModel | null>(null);
   const [boss, setBoss] = useState<BossModel | null>(null); // Boss state
@@ -35,6 +37,22 @@ const GamePlay = () => {
   const [highlightIndexWord, setHighlightIndexWord] = useState<number>(0);
   const [incorrectInputIndex, setIncorrectInputIndex] = useState<number | null>(null); // Track incorrect input index
 
+  // Function to fetch word dictionary from S3 using object URL
+  const fetchWordDict = async () => {
+      try {
+          const response = await fetch(wordDictUrl);
+          if (!response.ok) {
+              throw new Error('Failed to fetch word dictionary');
+          }
+
+          const dict = await response.json();
+          setWordDict(dict);
+      } catch (error) {
+          console.error('Error fetching word dictionary:', error);
+      } finally {
+          setLoading(false); // Mark as loaded when done
+      }
+  };
 
 
   useEffect(() => {
@@ -82,10 +100,11 @@ const GamePlay = () => {
 
   // Call this when starting the game or after each attack
   useEffect(() => {
+    if (loading) return;
     if (player) {
       pickRandomWord();
     }
-  }, [player]);
+  }, [player, loading]);
 
   useEffect(() => {
     // Check if the boss is defeated after state change
@@ -96,7 +115,8 @@ const GamePlay = () => {
 
   useEffect(() => {
     loadPlayerData(); 
-  }, []); //This effect loads the player data
+    fetchWordDict();
+  }, []); //This effect loads the player and word data
 
   useEffect(() => {
     // Only create the boss if not already initialized

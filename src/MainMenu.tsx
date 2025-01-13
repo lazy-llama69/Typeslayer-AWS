@@ -17,17 +17,17 @@ const MainMenu = () => {
 
     const handleLeaderboards = () => {
         console.log('Opening leaderboards...');
-        // navigate('/leaderboards');
+        navigate('/leaderboards');
     };
 
     const handleSettings = () => {
         console.log('Opening settings...');
-        // navigate('/settings')
+        navigate('/settings');
     };
 
     const handlePractice = () => {
         console.log('Opening practice mode...');
-        // navigate('/practice');
+        navigate('/practice');
     };
 
     return (
