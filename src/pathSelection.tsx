@@ -25,12 +25,12 @@ const PathSelection = () => {
     const { defeatedBossCount: totalDefeatedBossCount } = useParams();
     const [selectedPath, setSelectedPath] = useState<number | null>(null);
     const [breadcrumbs, setBreadcrumbs] = useState<string[]>(['Start']);
-    const shopAppears = Math.random() < 1; // 100% chance for the Shop to appear
+    const shopAppears = Math.random() < 1; 
     const [randomLocation, setRandomLocation] = useState<PathItem[]>([]); // Use state for locations
     const [player, setPlayer] = useState<PlayerModel | null>(null);
-    const [defeatedBossCount, setDefeatedBossCount] = useState<number>(0); // Track number of defeated bosses
+    const [defeatedBossCount, setDefeatedBossCount] = useState<number>(0); 
     
-    // Handle return to menu
+
     const handleReturnToMenu = () => {
         handleEnd();
     };
@@ -127,17 +127,14 @@ const PathSelection = () => {
         if(storedPlayerData){
             const parsedPlayer = JSON.parse(storedPlayerData);
             const reconstructedPlayer = Object.assign(new PlayerModel(parsedPlayer.id,parsedPlayer.username), parsedPlayer);
-            setPlayer(reconstructedPlayer);  // Set the player with the data from localStorage
+            setPlayer(reconstructedPlayer);  
         }
     }
     const handleEnd = () => {
-        console.log(player)
-        if (!player?.score){
-            // updateLeaderboard(player?.username ?? 'error',0);
-            console.log("Missing score")
-        } else {
+        console.log(player);
+        if (player?.score){
             updateLeaderboard(player?.username, player?.score);
-        }
+        } 
         localStorage.clear();
         navigate('/');
     };
@@ -163,7 +160,7 @@ const PathSelection = () => {
     <View padding="2rem">
         {/* Breadcrumbs Component */}
         <ScrollView
-                width="1500px"  // Width smaller than the content
+                width="1500px" 
                 height='60px'
                 autoScroll="instant"
         >
@@ -196,6 +193,7 @@ const PathSelection = () => {
 
             </p>
 
+            {/*3 Chosen Path Cards*/}
             <Collection items={randomLocation} type="list" direction="row" gap="20px" wrap="nowrap">
                 {(item, index) => (
                 <Card

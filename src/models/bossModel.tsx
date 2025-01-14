@@ -4,7 +4,7 @@ export class BossModel {
     maxHealth: number;    // Maximum health
     damage: number;       // Damage dealt by the boss
     bounty: number;       // Reward after killing boss 
-    score: number;
+    score: number;        // Points added to player score after defeating boss
     url: string;          // Url to boss image
   
     constructor(name: string, maxHealth: number, damage: number, bounty: number, url: string) {
@@ -24,7 +24,7 @@ export class BossModel {
         .setHealth(newHealth); // Set the new health value
     }
 
-    // Helper method to set health (can be used in combination with takeDamage)
+    // Helper method to set health 
     setHealth(health: number): BossModel {
       this.health = health;
       return this;

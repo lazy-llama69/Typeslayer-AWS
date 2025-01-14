@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useRef, useState } from "r
 const MusicContext = createContext({
   playMusic: () => {},
   pauseMusic: () => {},
-  setVolume: (volume: number) => {// Example: Update state or perform some action with volume
+  setVolume: (volume: number) => {
     console.log(volume); },
   volume: 0.5,
 });

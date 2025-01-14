@@ -12,49 +12,71 @@ import { FaArrowRight } from "react-icons/fa";
 
   
 const GamePlay = () => {
-  const [wordDict, setWordDict] = useState<Record<string, number>>({});
+  // Constants and Router Hooks
   const wordDictUrl = 'https://typerslayer-music.s3.ap-southeast-2.amazonaws.com/words_dictionary.json';
-  const [loading, setLoading] = useState<boolean>(true); // Loading state to track if the wordDict is fetched
-  const {pathId, defeatedBossCount: totalDefeatedBossCount } = useParams();
+  const navigate = useNavigate();
+  const { pathId, defeatedBossCount: totalDefeatedBossCount } = useParams();
+
+  // Core Game State
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [wordDict, setWordDict] = useState<Record<string, number>>({});
+
+  // Entity States
   const [player, setPlayer] = useState<PlayerModel | null>(null);
-  const [boss, setBoss] = useState<BossModel | null>(null); // Boss state
-  const [userInput, setUserInput] = useState(''); // User's input
+  const [boss, setBoss] = useState<BossModel | null>(null);
+  const [avatarImage, setAvatarImage] = useState<string>();
+  const [defeatedBossCount, setDefeatedBossCount] = useState<number>(
+    parseInt(totalDefeatedBossCount || '0', 10)
+  );
+
+  // Combat and Typing Mechanics
+  const [currentWord, setCurrentWord] = useState('');
+  const [userInput, setUserInput] = useState('');
+  const [highlightIndexWord, setHighlightIndexWord] = useState<number>(0);
+  const [incorrectInputIndex, setIncorrectInputIndex] = useState<number | null>(null);
+
+  // Dodge Mechanism
   const [dodgeSequence, setDodgeSequence] = useState<string[]>([]);
   const [isDodging, setIsDodging] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(3); // 3 seconds to dodge
-  const [counterattackInProgress, setCounterattackInProgress] = useState(false); // Track if counterattack is happening
-  const [currentWord, setCurrentWord] = useState('');
-  const [defeatedBossCount, setDefeatedBossCount] = useState<number>(parseInt(totalDefeatedBossCount || '0', 10)); // Track number of defeated bosses
-  const navigate = useNavigate();
+  const [timeLeft, setTimeLeft] = useState(3);
+  const [counterattackInProgress, setCounterattackInProgress] = useState(false);
+
+  // UI States
   const [breadcrumbs, setBreadcrumbs] = useState<string[]>(['Start']);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
-  const [selectedWeapon, setSelectedWeapon] = useState<string | null>(null); // Default value
-  const [selectedClothing, setSelectedClothing] = useState<string | null>(null); //Default value
-  const [selectedPotion, setSelectedPotion] = useState<string | null>(null); //Default value
-  const [isInitialized, setIsInitialized] = useState(false);   
-  const [avatarImage, setAvatarImage] = useState<string>();
-  const [highlightIndexWord, setHighlightIndexWord] = useState<number>(0);
-  const [incorrectInputIndex, setIncorrectInputIndex] = useState<number | null>(null); // Track incorrect input index
 
-  // Function to fetch word dictionary from S3 using object URL
-  const fetchWordDict = async () => {
-      try {
-          const response = await fetch(wordDictUrl);
-          if (!response.ok) {
-              throw new Error('Failed to fetch word dictionary');
-          }
+  // Equipment States
+  const [selectedWeapon, setSelectedWeapon] = useState<string | null>(null);
+  const [selectedClothing, setSelectedClothing] = useState<string | null>(null);
+  const [selectedPotion, setSelectedPotion] = useState<string | null>(null);
 
-          const dict = await response.json();
-          setWordDict(dict);
-      } catch (error) {
-          console.error('Error fetching word dictionary:', error);
-      } finally {
-          setLoading(false); // Mark as loaded when done
-      }
-  };
+  //--------------------------------------------Game Start and Initialization--------------------------------------------
+  useEffect(() => {
+    loadPlayerData(); 
+    fetchWordDict();
+  }, []); //This effect loads the player and word data
+
+  useEffect(() => {
+    // Only create the boss if not already initialized
+    if (player && !isInitialized) {
+      handCreateBoss();
+      setIsInitialized(true);
+    }
+  }, [player, isInitialized]); //This effect starts the game
 
 
+  //-----------------------------------------Boss Death Logic---------------------------------------------
+  useEffect(() => {
+    // Check if the boss is defeated after state change
+    if (boss && boss.health <= 0) {
+      handleBossDefeat();
+    }
+  }, [boss]); // This effect runs when `boss` state changes
+
+  //-----------------------------------------Dodge Sequence Logic---------------------------------------------
+  // Start the dodge sequence/counterattack
   useEffect(() => {
     if (counterattackInProgress) {
       // If counterattack is in progress, start the dodge sequence
@@ -82,6 +104,7 @@ const GamePlay = () => {
     };
   }, [isDodging, dodgeSequence]);
 
+  //Dodge timer logic
   useEffect(() => {
     if (isDodging && timeLeft > 0) {
       const timer = setInterval(() => {
@@ -98,7 +121,8 @@ const GamePlay = () => {
     }
   }, [isDodging, timeLeft]);
 
-  // Call this when starting the game or after each attack
+  //-----------------------------------------Game Progress and Word Handling---------------------------------------------
+  // Loads the word when player loads in
   useEffect(() => {
     if (loading) return;
     if (player) {
@@ -106,27 +130,9 @@ const GamePlay = () => {
     }
   }, [player, loading]);
 
-  useEffect(() => {
-    // Check if the boss is defeated after state change
-    if (boss && boss.health <= 0) {
-      handleBossDefeat();
-    }
-  }, [boss]); // This effect runs when `boss` state changes
-
-  useEffect(() => {
-    loadPlayerData(); 
-    fetchWordDict();
-  }, []); //This effect loads the player and word data
-
-  useEffect(() => {
-    // Only create the boss if not already initialized
-    if (player && !isInitialized) {
-      handCreateBoss();
-      setIsInitialized(true);
-    }
-  }, [player, isInitialized]); //This effect starts the game
-
-
+  //------------------------------------------------------------------------------------------
+  //------------------------------------------------------------------------------------------
+  //----------------------------------- Handlers for Menu and Inventory Logic---------------------------------------------
   const handleMenuOpenChange = (open: boolean) => {
     setIsMenuOpen(open);
   };
@@ -135,8 +141,87 @@ const GamePlay = () => {
     setIsInventoryOpen(open);
   };
 
+
+  //----------------------------------- Initialization Logic---------------------------------------------
+  const fetchWordDict = async () => {
+    try {
+        const response = await fetch(wordDictUrl);
+        if (!response.ok) {
+            throw new Error('Failed to fetch word dictionary');
+        }
+
+        const dict = await response.json();
+        setWordDict(dict);
+    } catch (error) {
+        console.error('Error fetching word dictionary:', error);
+    } finally {
+        setLoading(false); // Mark as loaded when done
+    }
+  };
+  const handCreateBoss = () => {
+    if (!player) return;  // Ensure player is loaded before creating the boss
+    
+    // Check if pathId is a valid key in bosses
+    if (pathId === "1" || pathId === "2" || pathId === "3") {
+      const [bossName, health, attack, reward, url] = bosses[pathId] as [string, number, number, number, string];;
+
+      const newBoss = new BossModel(bossName, health, attack, reward, url);
+      setBoss(newBoss);
+    } else {
+      console.error("Invalid pathId:", pathId);
+    }
+  };
+
+  
+  //-----------------------------------------Quit Logic---------------------------------------------
   const closeMenu = () => setIsMenuOpen(false);
 
+  const handleReturnToMenu = () => {
+    handleEnd(defeatedBossCount);
+  };
+
+
+
+  //-----------------------------------------End Logic---------------------------------------------
+  const handleBossDefeat = () => {
+    if (boss && player){
+      if (!(player instanceof PlayerModel)){
+        loadPlayerData();
+      }
+      // console.log("Handle boss defeat called");
+      player.money += boss.bounty;
+      player.score += boss.score;
+      try{
+        player.gainExperience(Math.floor(Math.random() * 100));
+      } catch {
+        console.log('player has no gain experience function');
+        player.experience += Math.floor(Math.random() * 100);
+        if(player.experience >= 100){
+          player.level++;
+          player.experience -= 100;
+        }
+      }
+      
+      savePlayerData(); // Save updated player data after defeating the boss
+      alert('You have defeated the boss');
+      // console.log("This is the players money",player?.money);
+      // console.log('This is the defeated boss count', defeatedBossCount+1);
+    }
+    // Continues the endless journey and lets the player choose a new path
+    setDefeatedBossCount((prevCount) => prevCount + 1);
+    navigate(`/pathselection/${defeatedBossCount+1}`); 
+
+  };
+
+  const handleEnd = (defBossCount: number) => {
+    localStorage.clear();
+    updateLeaderboard(player?.username ?? "error", player?.score ?? 0, defBossCount);
+    navigate('/');
+  };
+
+  
+
+  //-----------------------------------------Player Data Management---------------------------------------------
   const savePlayerData = () => {
     if (player) {
       localStorage.setItem('playerData', JSON.stringify(player));
@@ -163,57 +248,16 @@ const GamePlay = () => {
     }
   };
 
+
+  //-----------------------------------------Bosses---------------------------------------------
   const bosses = {
     "3": ['Slendy Manny', 200, 40, 50,'/assets/entities/slenddy.jpg'],
     "1": ['The Wicked Witch', 150, 30, 25,'/assets/entities/wicked_witch.jpg'],
     "2": ['Goblin', 125, 25, 80,'/assets/entities/goblin.jpg'],
   };
 
-  const handCreateBoss = () => {
-    if (!player) return;  // Ensure player is loaded before creating the boss
-    
-    // Check if pathId is a valid key in bosses
-    if (pathId === "1" || pathId === "2" || pathId === "3") {
-      const [bossName, health, attack, reward, url] = bosses[pathId] as [string, number, number, number, string];;
-
-      const newBoss = new BossModel(bossName, health, attack, reward, url);
-      setBoss(newBoss);
-    } else {
-      console.error("Invalid pathId:", pathId);
-    }
-  };
-
-  const handleReturnToMenu = () => {
-    handleEnd(defeatedBossCount);
-  };
-
-  // Function to handle boss defeat
-  const handleBossDefeat = () => {
-    if (boss && player){
-      while (!(player instanceof PlayerModel)){
-        loadPlayerData();
-      }
-      // console.log("Handle boss defeat called");
-      player.money += boss.bounty;
-      player.score += boss.score;
-      player.gainExperience(100);
-      savePlayerData(); // Save updated player data after defeating the boss
-      alert('You have defeated the boss');
-      // console.log("This is the players money",player?.money);
-      // console.log('This is the defeated boss count', defeatedBossCount+1);
-    }
-    // Continues the endless journey and lets the player choose a new path
-    setDefeatedBossCount((prevCount) => prevCount + 1);
-    navigate(`/pathselection/${defeatedBossCount+1}`); 
-
-  };
-
-  const handleEnd = (defBossCount: number) => {
-    localStorage.clear();
-    updateLeaderboard(player?.username ?? "error", player?.score ?? 0, defBossCount);
-    navigate('/');
-  };
-
+  
+  //-----------------------------------------Update Leaderboard---------------------------------------------
   const updateLeaderboard = async (name: string, score: number, defBossCount: number) => {  
     console.log("This is the name and score", name,score);
     try {
@@ -229,6 +273,10 @@ const GamePlay = () => {
     }
   };
 
+
+
+
+  //-----------------------------------------Render Hearts Logic---------------------------------------------
   const renderHearts = (currentHealth: number, maxHealth: number) => {
     const hearts = [];
     const numHearts = maxHealth / 10; // Total hearts based on max health
@@ -244,7 +292,89 @@ const GamePlay = () => {
     return hearts;
   };
 
-  // Handle the attack logic
+
+
+  //-----------------------------------------Dodge Logic---------------------------------------------
+  const renderDodgeSequence = () => {
+    return dodgeSequence.map((direction, index) => {
+      switch (direction) {
+        case 'Up':
+          return <HiOutlineArrowSmallUp key={index} size={24} color= "black"/>;
+        case 'Down':
+          return <HiOutlineArrowSmallDown key={index} size={24} color= "black" />;
+        case 'Left':
+          return <HiOutlineArrowSmallLeft key={index} size={24} color= "black" />;
+        case 'Right':
+          return <HiOutlineArrowSmallRight key={index} size={24} color= "black" />;
+        default:
+          return null;
+      }
+    });
+  };
+
+  // Generate a random dodge sequence
+  const generateDodgeSequence = () => {
+    const directions = ['Up', 'Down', 'Left', 'Right'];
+    let sequence: string[] = [];
+    for (let i = 0; i < 5; i++) {
+      const randomDirection = directions[Math.floor(Math.random() * directions.length)];
+      sequence.push(randomDirection);
+    }
+    setDodgeSequence(sequence);
+    setIsDodging(true);
+    setTimeLeft(3); // Reset the timer to 3 seconds
+  };
+  
+  // Handle the dodge logic
+  const handleDodgeInput = (direction: string) => {
+    if (isDodging && dodgeSequence.length > 0) {
+  
+      if (dodgeSequence[0] === direction) {
+        // Correct input, remove the first element from the queue
+        setDodgeSequence((prev) => prev.slice(1));
+  
+        if (dodgeSequence.length === 1) {
+          // If this was the last input, dodge is successful
+          setIsDodging(false);
+          alert('Dodge successful!');
+        }
+      } else {
+        // Incorrect input
+        setIsDodging(false);
+        alert('Dodge failed! Boss counterattack hits you!');
+        handleCounterattack();
+      }
+    }
+  };
+
+  // Start the counterattack and set a timer for the player to dodge
+  const startCounterattack = () => {
+    setCounterattackInProgress(false); // End counterattack phase
+    generateDodgeSequence(); // Generate dodge sequence
+  };
+
+  // Handle the counter logic
+  const handleCounterattack = () => {
+    // Boss counterattacks and reduces player's health
+    setPlayer((prevPlayer) => {
+      if (!prevPlayer) return null;
+      const updatedHealth = Math.max(0, prevPlayer.health - (boss?.damage || 20));
+
+      if (updatedHealth <= 0) {
+        alert('You have been defeated by the boss!');
+        handleEnd(defeatedBossCount);
+        return null;
+      }
+
+      return {
+        ...prevPlayer,
+        health: updatedHealth,
+      } as PlayerModel;
+    });
+  };
+
+
+  //-----------------------------------------Attack Logic---------------------------------------------
   const handleAttack = (bool: boolean) => {
     if (bool) {
       setUserInput(''); // Clear the input after attack
@@ -313,90 +443,14 @@ const GamePlay = () => {
       }
   };
 
-  // Generate a random dodge sequence
-  const generateDodgeSequence = () => {
-    const directions = ['Up', 'Down', 'Left', 'Right'];
-    let sequence: string[] = [];
-    for (let i = 0; i < 5; i++) {
-      const randomDirection = directions[Math.floor(Math.random() * directions.length)];
-      sequence.push(randomDirection);
-    }
-    setDodgeSequence(sequence);
-    setIsDodging(true);
-    setTimeLeft(3); // Reset the timer to 3 seconds
-  };
-  
-  // Handle the dodge logic
-  const handleDodgeInput = (direction: string) => {
-    if (isDodging && dodgeSequence.length > 0) {
-  
-      if (dodgeSequence[0] === direction) {
-        // Correct input, remove the first element from the queue
-        setDodgeSequence((prev) => prev.slice(1));
-  
-        if (dodgeSequence.length === 1) {
-          // If this was the last input, dodge is successful
-          setIsDodging(false);
-          alert('Dodge successful!');
-        }
-      } else {
-        // Incorrect input
-        setIsDodging(false);
-        alert('Dodge failed! Boss counterattack hits you!');
-        handleCounterattack();
-      }
-    }
-  };
-
-  // Start the counterattack and set a timer for the player to dodge
-  const startCounterattack = () => {
-    setCounterattackInProgress(false); // End counterattack phase
-    generateDodgeSequence(); // Generate dodge sequence
-  };
-
-  // Handle the counter logic
-  const handleCounterattack = () => {
-    // Boss counterattacks and reduces player's health
-    setPlayer((prevPlayer) => {
-      if (!prevPlayer) return null;
-      const updatedHealth = Math.max(0, prevPlayer.health - (boss?.damage || 20));
-
-      if (updatedHealth <= 0) {
-        alert('You have been defeated by the boss!');
-        handleEnd(defeatedBossCount);
-        return null;
-      }
-
-      return {
-        ...prevPlayer,
-        health: updatedHealth,
-      } as PlayerModel;
-    });
-  };
-
-  const renderDodgeSequence = () => {
-    return dodgeSequence.map((direction, index) => {
-      switch (direction) {
-        case 'Up':
-          return <HiOutlineArrowSmallUp key={index} size={24} color= "black"/>;
-        case 'Down':
-          return <HiOutlineArrowSmallDown key={index} size={24} color= "black" />;
-        case 'Left':
-          return <HiOutlineArrowSmallLeft key={index} size={24} color= "black" />;
-        case 'Right':
-          return <HiOutlineArrowSmallRight key={index} size={24} color= "black" />;
-        default:
-          return null;
-      }
-    });
-  };
-  
   const pickRandomWord = () => {
     const wordKeys = Object.keys(wordDict);  
     const randomIndex = Math.floor(Math.random() * wordKeys.length);
     setCurrentWord(wordKeys[randomIndex]);  // Set the random word from the keys
   };
 
+
+  //-----------------------------------------Theme---------------------------------------------
   const theme = createTheme({
     name: 'breadcrumbs-theme',
     tokens: {
@@ -410,31 +464,8 @@ const GamePlay = () => {
     },
   });
 
-  const handleEquipmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const item = player?.inventory.find(i => i.id === e.target.value);
-    var itemToUnequip;
-    if (e.target.value.charAt(0) === '1'){
-      itemToUnequip = player?.equippedItems.find(i => i.type === 'weapon');
-      setSelectedWeapon(e.target.value);
-    } else {
-      itemToUnequip = player?.equippedItems.find(i => i.type === 'armor');
-      setSelectedClothing(e.target.value);
-    }
-    if (itemToUnequip) {
-      // Unequip the currently equipped item
-      player?.unequipItem(itemToUnequip);
-    } 
-    if (item){
-      // Equip the new item
-      player?.equipItem(item);
-      console.log("successfully changed equipment");
-    } else {
-      // Handle case where the weapon was not found
-      console.error('Item not found for equip operation');
-    }
 
-  };
-
+  //-----------------------------------------Potion Logic---------------------------------------------
   const handlePotionChosen = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedPotion(e.target.value); // Update selected potion ID
   };
@@ -479,7 +510,34 @@ const GamePlay = () => {
       alert('The boss is counterattacking!');
       setCounterattackInProgress(true); // Trigger counterattack
     }
-  }
+  };
+
+
+  //-----------------------------------------Equipment Logic---------------------------------------------
+  const handleEquipmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const item = player?.inventory.find(i => i.id === e.target.value);
+    var itemToUnequip;
+    if (e.target.value.charAt(0) === '1'){
+      itemToUnequip = player?.equippedItems.find(i => i.type === 'weapon');
+      setSelectedWeapon(e.target.value);
+    } else {
+      itemToUnequip = player?.equippedItems.find(i => i.type === 'armor');
+      setSelectedClothing(e.target.value);
+    }
+    if (itemToUnequip) {
+      // Unequip the currently equipped item
+      player?.unequipItem(itemToUnequip);
+    } 
+    if (item){
+      // Equip the new item
+      player?.equipItem(item);
+      console.log("successfully changed equipment");
+    } else {
+      // Handle case where the weapon was not found
+      console.error('Item not found for equip operation');
+    }
+
+  };
 
   return (
     
@@ -525,14 +583,14 @@ const GamePlay = () => {
               legendHidden
               name="weapon"
               value={selectedWeapon || 'invalid'}
-              onChange={handleEquipmentChange} // Call handler on change
+              onChange={handleEquipmentChange} 
             > 
               {/* Render only weapons available in the player's inventory */}
               {player?.inventory
-                .filter((item) => item.type === 'weapon')  // Assuming each item has a 'type' property
+                .filter((item) => item.type === 'weapon') 
                 .map((weapon) => (
                   <Radio key={weapon.id} value={weapon.id}>
-                    {weapon.name} {/* Assuming each weapon has a 'name' property */}
+                    {weapon.name} 
                   </Radio>
                 ))}
             </RadioGroupField>
@@ -546,8 +604,9 @@ const GamePlay = () => {
             legendHidden
             name="clothing"
             value={selectedClothing || "invalid"}
-            onChange={handleEquipmentChange} // Call handler on change
+            onChange={handleEquipmentChange} 
           >
+            {/* Render only armor available in the player's inventory */}
             {player?.inventory
                 .filter((item) => item.type === 'armor')  
                 .map((armor) => (
@@ -566,8 +625,9 @@ const GamePlay = () => {
             legendHidden
             name="potions"
             value={selectedPotion || "invalid"}
-            onChange={handlePotionChosen} // Call handler on change
+            onChange={handlePotionChosen} 
           >
+            {/* Render only potions available in the player's inventory */}
             {player?.inventory
                 .filter((item) => item.type === 'potion')  
                 .map((potion) => (
@@ -598,7 +658,7 @@ const GamePlay = () => {
       {/* Breacrumbs/Top section */}
       <View position='absolute' top='10px' left='18rem'>
         <ScrollView
-        width="1500px"  // Width smaller than the content
+        width="1500px"  
         height='60px'
         autoScroll="instant"
         >
@@ -606,7 +666,7 @@ const GamePlay = () => {
             <Breadcrumbs.Container 
               borderRadius="medium" 
               padding="medium"
-              style={{ display: 'inline-flex', flexWrap: 'nowrap' }} // Keep items in a single line
+              style={{ display: 'inline-flex', flexWrap: 'nowrap' }} 
             >
               {breadcrumbs.map((text, idx) => (
                 <Breadcrumbs.Item key={`${idx}`} color={"#3F00FF"}>
@@ -615,7 +675,7 @@ const GamePlay = () => {
                     style={{
                       fontWeight: 'bold',
                       textDecoration: 'underline',
-                      marginRight: '10px', // Add space between items
+                      marginRight: '10px', 
                     }}
                   >
                     {text}

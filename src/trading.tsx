@@ -20,7 +20,7 @@ const Trading = () => {
   const [itemsForSale, setItemsForSale] = useState<Item[]>();
   
   useEffect(() => {
-    loadPlayerData(); //This effect starts the game
+    loadPlayerData(); 
     chooseItemsForSale();
   }, []);
 

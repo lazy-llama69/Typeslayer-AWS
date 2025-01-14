@@ -2,7 +2,7 @@ import { Item } from "../items/item";
 
   
   export interface Player {
-    id: string;            // Unique identifier for the player (could be userId from Cognito)
+    id: string;            // Unique identifier for the player (
     username: string;      // Player's username
     health: number;        // Player's health points
     maxHealth: number;     // Max health value (can scale with level)
@@ -13,10 +13,9 @@ import { Item } from "../items/item";
     money: number;         // Money the player currently has
     score: number;         // Player overall score 
     damage: number;        // Player base damage
-    armor: number;        // Player armor
+    armor: number;         // Player armor
   }
   
-  // Player Model Class with Methods
   export class PlayerModel implements Player {
     id: string;
     username: string;
@@ -49,7 +48,7 @@ import { Item } from "../items/item";
     // Method to increase experience and level up
     gainExperience(amount: number) {
       this.experience += amount;
-      while (this.experience >= this.level * 100) { // assuming 100 XP per level
+      while (this.experience >= this.level * 100) { // 100 XP per level
         this.experience -= this.level * 100;
         this.levelUp();
       }
@@ -71,12 +70,12 @@ import { Item } from "../items/item";
       this.health = this.maxHealth; // Restore full health upon leveling up
     }
   
-    // Method to take damage (reduce health)
+    // Method to take damage 
     takeDamage(amount: number) {
       this.health = Math.max(0, this.health - amount);
     }
   
-    // Method to heal (increase health)
+    // Method to heal 
     heal(amount: number) {
       this.health = Math.min(this.maxHealth, this.health + amount);
     }
@@ -108,11 +107,17 @@ import { Item } from "../items/item";
   
     // Method to use an item (e.g., potion)
     useItem(item: Item) {
-      if (item.type === 'potion' && item.effect === 'heal') {
-        this.heal(50); // Heal by 50 (for example)
-        // After using the item, you may remove it from inventory if it's consumable
-        this.removeItem(item);
-      }
+      if (item.type === 'potion' ) {
+        if (item.effect === 'heal'){
+          this.heal(50); // Heal by 50 
+          // Remove after consuming
+          this.removeItem(item);
+        } else if (item.effect === 'attack') {
+          this.damage += 50
+        } else{
+          this.armor += 50
+        }
+      } 
     }
   
     // Method to remove an item from inventory
@@ -132,7 +137,7 @@ import { Item } from "../items/item";
       if (item.type === 'armor'){
         this.armor -= parseInt(item.effect || '0', 10);
       } else{
-        this.damage = 5;
+        this.damage = 25;
       }
     }
   }

@@ -1,5 +1,5 @@
 const NumberPad: React.FC<{ onNumberInput: (number: string) => void, onClear: () => void, onNext: () => void}> = ({ onNumberInput, onClear, onNext }) => {
-    // Create the number pad layout with 3 rows and 3 columns for the numbers 1-9, and include buttons for 0, clear, and submit.
+    // Create a number pad layout with 3 rows and 3 columns for the numbers 1-9, including buttons for 0, clear, and submit.
     const handleClick = (value: string) => {
         onNumberInput(value);
     };
@@ -7,8 +7,6 @@ const NumberPad: React.FC<{ onNumberInput: (number: string) => void, onClear: ()
     return (
         <div>
             <div className="display"> {/* Display the entered number */}
-                {/* Show the number input here */}
-                {/* The number will come from the parent (Practice.tsx) */}
             </div>
 
             <div className="number-pad">

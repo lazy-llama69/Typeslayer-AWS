@@ -4,7 +4,7 @@ export interface Item {
     name: string;
     type: 'weapon' | 'armor' | 'potion';
     price: number;  // Price of the item for trading
-    effect?: string;  // Optional effect, used for potions
+    effect?: string;  // Effect to player 
     url: string;  // path to image 
     count: number; // number of the item in player inventory
 }
