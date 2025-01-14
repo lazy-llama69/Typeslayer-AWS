@@ -6,8 +6,6 @@ import { PlayerModel } from './models/playerModel';
 import { Item } from './items/item';
 import { FiMinusSquare, FiPlusSquare } from 'react-icons/fi';
 
-// Example of how the player might be initialized (you would replace this with actual data)
-
 // Initialize the Trader
 const trader = new TraderModel();
 
@@ -107,12 +105,12 @@ const Trading = () => {
     },
   });
 
-  const refresh = () => {
-    const items = trader.itemsForSale;
-    // Shuffle the available items and select the first 3
-    const shuffled = items.sort(() => Math.random() - 0.5);
-    setItemsForSale(shuffled.slice(0,3));
-  }
+  // const refresh = () => {
+  //   const items = trader.itemsForSale;
+  //   // Shuffle the available items and select the first 3
+  //   const shuffled = items.sort(() => Math.random() - 0.5);
+  //   setItemsForSale(shuffled.slice(0,3));
+  // }
 
   return (
     <View padding="2rem">
@@ -211,7 +209,6 @@ const Trading = () => {
                 >
                     Back to Paths
                 </Button>
-                <Button onClick={refresh}> refresh</Button>
             </Flex>
             
         </Flex>

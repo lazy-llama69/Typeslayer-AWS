@@ -4,8 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { MdLeaderboard, MdSettings, MdExitToApp } from "react-icons/md";
 import { TbTargetArrow, TbCubePlus  } from "react-icons/tb";
 
-const MainMenu = () => {
 
+const MainMenu = () => {
+    
     const { user, signOut } = useAuthenticator();
     const navigate = useNavigate(); // initialize navigate
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PlayerModel } from './models/playerModel';
 import { BossModel } from './models/bossModel'; 
-import { Button, Input, Flex, Heading, View, Breadcrumbs, ThemeProvider, createTheme, Menu, MenuItem, MenuButton, Radio, RadioGroupField, Divider, } from '@aws-amplify/ui-react';
+import { Button, Input, Flex, Heading, View, Breadcrumbs, ThemeProvider, createTheme, Menu, MenuItem, MenuButton, Radio, RadioGroupField, Divider, ScrollView, } from '@aws-amplify/ui-react';
 import { IoIosHeart } from "react-icons/io";
 import { MdHeartBroken } from "react-icons/md";
 import { HiOutlineArrowSmallUp, HiOutlineArrowSmallDown, HiOutlineArrowSmallLeft, HiOutlineArrowSmallRight } from "react-icons/hi2";
@@ -76,7 +76,7 @@ const GamePlay = () => {
     // Add event listener
     window.addEventListener('keydown', handleKeyDown);
 
-    // Cleanup the event listener
+    // Cleanup the event 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
@@ -164,9 +164,9 @@ const GamePlay = () => {
   };
 
   const bosses = {
-    "3": ['Slendy Manny', 150, 25, 50,'/assets/entities/slenddy.jpg'],
-    "1": ['The Wicked Witch', 150, 25, 50,'/assets/entities/wicked_witch.jpg'],
-    "2": ['Goblin', 150, 25, 50,'/assets/entities/goblin.jpg'],
+    "3": ['Slendy Manny', 200, 40, 50,'/assets/entities/slenddy.jpg'],
+    "1": ['The Wicked Witch', 150, 30, 25,'/assets/entities/wicked_witch.jpg'],
+    "2": ['Goblin', 125, 25, 80,'/assets/entities/goblin.jpg'],
   };
 
   const handCreateBoss = () => {
@@ -184,14 +184,13 @@ const GamePlay = () => {
   };
 
   const handleReturnToMenu = () => {
-    localStorage.clear();
-    navigate('/');
+    handleEnd(defeatedBossCount);
   };
 
   // Function to handle boss defeat
   const handleBossDefeat = () => {
     if (boss && player){
-      if (!(player instanceof PlayerModel)){
+      while (!(player instanceof PlayerModel)){
         loadPlayerData();
       }
       // console.log("Handle boss defeat called");
@@ -203,28 +202,22 @@ const GamePlay = () => {
       // console.log("This is the players money",player?.money);
       // console.log('This is the defeated boss count', defeatedBossCount+1);
     }
-    if (defeatedBossCount+1 === 5) {  
-      // After the second boss is defeated, end the game
-      alert('You have defeated all bosses! You win!');
-      handleEnd();
-    } else {
-      // Continues the journey and lets the player choose a new path
-      setDefeatedBossCount((prevCount) => prevCount + 1);
-      navigate(`/pathselection/${defeatedBossCount+1}`); 
-      
-    }
+    // Continues the endless journey and lets the player choose a new path
+    setDefeatedBossCount((prevCount) => prevCount + 1);
+    navigate(`/pathselection/${defeatedBossCount+1}`); 
+
   };
 
-  const handleEnd = () => {
+  const handleEnd = (defBossCount: number) => {
     localStorage.clear();
-    updateLeaderboard(player?.username ?? "error", player?.score ?? 0);
-    navigate('/')
+    updateLeaderboard(player?.username ?? "error", player?.score ?? 0, defBossCount);
+    navigate('/');
   };
 
-  const updateLeaderboard = async (name: string, score: number) => {  
+  const updateLeaderboard = async (name: string, score: number, defBossCount: number) => {  
     console.log("This is the name and score", name,score);
     try {
-      const bossCount = defeatedBossCount+1;
+      const bossCount = defBossCount;
       const response = await axios.post("https://5sovduu1i1.execute-api.ap-southeast-2.amazonaws.com/dev/leaderboard", {
         username: name,
         score: score,
@@ -370,6 +363,7 @@ const GamePlay = () => {
 
       if (updatedHealth <= 0) {
         alert('You have been defeated by the boss!');
+        handleEnd(defeatedBossCount);
         return null;
       }
 
@@ -487,34 +481,6 @@ const GamePlay = () => {
     }
   }
 
-
-  const debugButton = () => {
-    console.log(player);
-    console.log("Inventory: ",player?.inventory);
-    console.log("Equipped: ",player?.equippedItems);
-    // console.log(player instanceof PlayerModel); // Should return true
-    // console.log(player?.damage);
-    // console.log(boss?.health);
-    // player?.unequipItem(woodenSword);
-    // console.log(player?.equippedItems);
-    // console.log(player?.damage);
-    // console.log(selectedWeapon);
-
-    // add weapons
-    // player?.addItem(bow_and_arrow);
-    // player?.addItem(magic_wand);
-    // player?.equipItem(woodenSword);
-    
-
-
-    // remove weapons
-    // player?.removeItem(bow_and_arrow);
-    // player?.removeItem(magic_wand);
-    // player?.removeItem(woodenSword);
-
-  };
-
-
   return (
     
     <View padding="2rem">
@@ -524,21 +490,11 @@ const GamePlay = () => {
           <MenuItem
             onClick={() => {
               closeMenu();
-              alert('Resume Game');
             }}
           >
             Resume Game
           </MenuItem>
-            
-          <MenuItem
-            isDisabled={true}
-            onClick={() => {
-              closeMenu();
-              alert('Settings');
-            }}
-          >
-            Settings
-          </MenuItem>
+  
           <MenuButton 
             variation = "destructive"
             onClick={() => {
@@ -640,33 +596,41 @@ const GamePlay = () => {
       </View>
 
       {/* Breacrumbs/Top section */}
-      <Flex direction="column" alignItems="flex-start">
-        <Flex direction="row" justifyContent="flex-start" width="100%"> 
-          {/* Breadcrumbs Component */}
+      <View position='absolute' top='10px' left='18rem'>
+        <ScrollView
+        width="1500px"  // Width smaller than the content
+        height='60px'
+        autoScroll="instant"
+        >
           <ThemeProvider theme={theme}>
-                <Breadcrumbs.Container borderRadius="medium" padding="medium">
-                    {breadcrumbs.map((text, idx) => (
-                        
-                        <Breadcrumbs.Item key={`${idx}`} color={"#3F00FF"}>
-                            <Breadcrumbs.Link 
-                                isCurrent={idx === breadcrumbs.length - 1}
-                                style={{
-                                    fontWeight: 'bold',
-                                    textDecoration: 'underline',
-                                }}
-                            >
-                                {text}
-                            </Breadcrumbs.Link>
-                            {idx !== breadcrumbs.length - 1 && <FaArrowRight color= "pink" size="25px"/>} {/* Add separator except for the last item */}
-                        </Breadcrumbs.Item>
-                    ))}
-                </Breadcrumbs.Container>
+            <Breadcrumbs.Container 
+              borderRadius="medium" 
+              padding="medium"
+              style={{ display: 'inline-flex', flexWrap: 'nowrap' }} // Keep items in a single line
+            >
+              {breadcrumbs.map((text, idx) => (
+                <Breadcrumbs.Item key={`${idx}`} color={"#3F00FF"}>
+                  <Breadcrumbs.Link 
+                    isCurrent={idx === breadcrumbs.length - 1}
+                    style={{
+                      fontWeight: 'bold',
+                      textDecoration: 'underline',
+                      marginRight: '10px', // Add space between items
+                    }}
+                  >
+                    {text}
+                  </Breadcrumbs.Link>
+                  {idx !== breadcrumbs.length - 1 && <FaArrowRight color="pink" size="25px" />}
+                </Breadcrumbs.Item>
+              ))}
+            </Breadcrumbs.Container>
           </ThemeProvider>
-        </Flex>
-      </Flex>
+        </ScrollView>
+      </View>
+      
 
       {/* Middle section */}
-      <Flex direction="column" alignItems="center">
+      <Flex direction="column" alignItems="center" marginTop={'20px'}>
         {!player ? (
           <p>Loading player...</p>
         ) : (
@@ -753,7 +717,6 @@ const GamePlay = () => {
             )}
           </>
             )}
-            <Button variation = 'primary' onClick={debugButton}> Debug </Button>
       </Flex>
     </View>
   );

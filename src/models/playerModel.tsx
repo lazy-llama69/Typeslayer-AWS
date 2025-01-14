@@ -42,7 +42,7 @@ import { Item } from "../items/item";
       this.equippedItems = [];  // no items equipped initially
       this.money = 0;           // default money
       this.score = 0;           // default score
-      this.damage = 200;          // base damage
+      this.damage = 25;          // base damage
       this.armor = 0;           // default armor
     }
   
