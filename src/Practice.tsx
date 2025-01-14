@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heading, Button, Input, Flex, View, Menu, MenuItem, MenuButton, Tabs, ThemeProvider, createTheme, SwitchField, SliderField, Text, StepperField}from '@aws-amplify/ui-react';
-import wordDict from './assets/words_dictionary.json';
 import { HiOutlineArrowSmallUp, HiOutlineArrowSmallDown, HiOutlineArrowSmallLeft, HiOutlineArrowSmallRight } from "react-icons/hi2";
 import NumberPad from './models/numberpadModel';
 
@@ -20,11 +19,31 @@ const Practice = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     // Game State
+    const [wordDict, setWordDict] = useState<Record<string, number>>({});
+    const wordDictUrl = 'https://typerslayer-music.s3.ap-southeast-2.amazonaws.com/words_dictionary.json';
     const [currentWord, setCurrentWord] = useState('');
     const [userInput, setUserInput] = useState('');
     const [highlightIndexWord, setHighlightIndexWord] = useState<number>(0);
     const [incorrectInputIndex, setIncorrectInputIndex] = useState<number | null>(null); // Track incorrect input index
+    const [loading, setLoading] = useState<boolean>(true); // Loading state to track if the wordDict is fetched
+
     
+    // Function to fetch word dictionary from S3 using object URL
+    const fetchWordDict = async () => {
+        try {
+            const response = await fetch(wordDictUrl);
+            if (!response.ok) {
+                throw new Error('Failed to fetch word dictionary');
+            }
+
+            const dict = await response.json();
+            setWordDict(dict);
+        } catch (error) {
+            console.error('Error fetching word dictionary:', error);
+        } finally {
+            setLoading(false); // Mark as loaded when done
+        }
+    };
 
     // Combat State
     const [counterattackInProgress, setCounterattackInProgress] = useState(false);
@@ -103,9 +122,7 @@ const Practice = () => {
 
     // Word Management
     const pickRandomWord = () => {
-        // const wordKeys = Object.keys(wordDict);
         const randomIndex = Math.floor(Math.random() * filteredWords.length);
-        // console.log(filteredWords[randomIndex]);
         setCurrentWord(filteredWords[randomIndex]);
     };
 
@@ -284,6 +301,7 @@ const Practice = () => {
     };
 
     // Effects
+
     useEffect(() => {
         if (counterattackInProgress) {
             setCounterattackInProgress(false);
@@ -330,24 +348,29 @@ const Practice = () => {
     }, [isDodging, timeLeft]);
 
     useEffect(() =>{
-        const initialFilteredWords = filterWordsByLength(wordDict as Record<string, number>, wordLength, includeLessThanOrEqual);
+        if (loading) { return };
+        const initialFilteredWords = filterWordsByLength(wordDict, wordLength, includeLessThanOrEqual);
         setFilteredWords(initialFilteredWords);
         handleGenerateDigits();
         // Pick a random word after the filteredWords is set
         if (initialFilteredWords.length > 0) {
             setCurrentWord(initialFilteredWords[Math.floor(Math.random() * initialFilteredWords.length)]);
         }
+    }, [wordDict, loading]);
+
+    useEffect(()=>{
+        fetchWordDict();
     }, []);
 
     useEffect(() => {
         // Whenever wordLength or includeLessThanOrEqual changes, update filteredWords and pick a new word
-        const updatedFilteredWords = filterWordsByLength(wordDict as Record<string, number>, wordLength, includeLessThanOrEqual);
+        const updatedFilteredWords = filterWordsByLength(wordDict, wordLength, includeLessThanOrEqual);
         setFilteredWords(updatedFilteredWords);
 
         if (updatedFilteredWords.length > 0) {
             setCurrentWord(updatedFilteredWords[Math.floor(Math.random() * updatedFilteredWords.length)]);
         }
-    }, [wordLength,includeLessThanOrEqual]);
+    }, [wordLength,includeLessThanOrEqual]); 
 
     useEffect(() => {
         setWordScore(0);

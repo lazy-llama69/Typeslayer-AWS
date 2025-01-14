@@ -22,7 +22,7 @@ const MainMenu = () => {
 
     const handleSettings = () => {
         console.log('Opening settings...');
-        navigate('/settings')
+        navigate('/settings');
     };
 
     const handlePractice = () => {
