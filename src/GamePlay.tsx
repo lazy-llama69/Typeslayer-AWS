@@ -190,13 +190,23 @@ const GamePlay = () => {
   // Function to handle boss defeat
   const handleBossDefeat = () => {
     if (boss && player){
-      while (!(player instanceof PlayerModel)){
+      if (!(player instanceof PlayerModel)){
         loadPlayerData();
       }
       // console.log("Handle boss defeat called");
       player.money += boss.bounty;
       player.score += boss.score;
-      player.gainExperience(100);
+      try{
+        player.gainExperience(Math.floor(Math.random() * 100));
+      } catch {
+        console.log('player has no gain experience function');
+        player.experience += Math.floor(Math.random() * 100);
+        if(player.experience >= 100){
+          player.level++;
+          player.experience -= 100;
+        }
+      }
+      
       savePlayerData(); // Save updated player data after defeating the boss
       alert('You have defeated the boss');
       // console.log("This is the players money",player?.money);
