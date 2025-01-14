@@ -7,7 +7,7 @@ import { FaPlay, FaPause } from "react-icons/fa";
 const Settings = () => {
     const { volume, setVolume, pauseMusic, playMusic } = useMusic(); // Use volume and setVolume from MusicContext
     const navigate = useNavigate();
-    const [ musicStatus, setMusicStatus] = useState(true);
+    const [ musicStatus, setMusicStatus] = useState(false);
 
     const handleReturnToMenu = () => {
         navigate('/');
@@ -83,7 +83,7 @@ const Settings = () => {
                   onChange={handleMusicToggle}
                   isPressed={musicStatus}
                   >
-                    {musicStatus ? <FaPause /> : <FaPlay />} 
+                    {!musicStatus ? <> <FaPause /> Music Paused </>: <><FaPlay /> Music Playing</>} 
                   </ToggleButton>
 
                 </Flex>
