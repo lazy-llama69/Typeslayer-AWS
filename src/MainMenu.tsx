@@ -8,26 +8,22 @@ import { TbTargetArrow, TbCubePlus  } from "react-icons/tb";
 const MainMenu = () => {
     
     const { user, signOut } = useAuthenticator();
-    const navigate = useNavigate(); // initialize navigate
+    const navigate = useNavigate(); 
 
     // Main menu buttons
     const handleNewGame = () => {
-        console.log('New game started!');
-        navigate('/nameCreation'); // navigate to the gameplay screen
+        navigate('/nameCreation'); 
     };
 
     const handleLeaderboards = () => {
-        console.log('Opening leaderboards...');
         navigate('/leaderboards');
     };
 
     const handleSettings = () => {
-        console.log('Opening settings...');
         navigate('/settings');
     };
 
     const handlePractice = () => {
-        console.log('Opening practice mode...');
         navigate('/practice');
     };
 
@@ -72,8 +68,8 @@ const MainMenu = () => {
                     onClick={handleNewGame}
                     style={{
                         cursor: 'pointer',
-                        backgroundColor: '#d1e7dd', // Light green for positivity
-                        color: '#0f5132', // Dark green for contrast
+                        backgroundColor: '#d1e7dd', 
+                        color: '#0f5132', 
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -92,8 +88,8 @@ const MainMenu = () => {
                     onClick={handlePractice}
                     style={{
                         cursor: 'pointer',
-                        backgroundColor: '#cff4fc', // Light blue for a calming effect
-                        color: '#055160', // Dark blue for contrast
+                        backgroundColor: '#cff4fc', 
+                        color: '#055160',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -112,8 +108,8 @@ const MainMenu = () => {
                     onClick={handleLeaderboards}
                     style={{
                         cursor: 'pointer',
-                        backgroundColor: '#fef3c7', // Light yellow for excitement
-                        color: '#854d0e', // Dark brown for contrast
+                        backgroundColor: '#fef3c7', 
+                        color: '#854d0e',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -132,8 +128,8 @@ const MainMenu = () => {
                     onClick={handleSettings}
                     style={{
                         cursor: 'pointer',
-                        backgroundColor: '#f0f4f8 ', // Light gray for a disabled look
-                        color: '#2c3e50 ', // Dark gray for contrast
+                        backgroundColor: '#f0f4f8 ', 
+                        color: '#2c3e50 ', 
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -152,8 +148,8 @@ const MainMenu = () => {
                     onClick={signOut}
                     style={{
                         cursor: 'pointer',
-                        backgroundColor: '#f8d7da', // Light red for warning
-                        color: '#842029', // Dark red for contrast
+                        backgroundColor: '#f8d7da', 
+                        color: '#842029',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',

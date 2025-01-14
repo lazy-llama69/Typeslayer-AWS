@@ -11,7 +11,7 @@ type LeaderboardEntry = {
 
 const Leaderboards = () => {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [loading, setLoading] = useState(true); // State to track loading
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const fetchLeaderboard = async () => {
@@ -20,12 +20,10 @@ const Leaderboards = () => {
       
       // JSON-nify the response to be readable
       setLeaderboard(JSON.parse(response.data.body).leaderboardData);
-      // console.log("This is the response:",JSON.parse(response.data.body).leaderboardData);
-      // console.log("This is the leaderboard:",leaderboard);  
     } catch (error) {
       console.error("Error fetching leaderboard data:", error);
     } finally {
-      setLoading(false); // Set loading to false after fetching completes (either success or failure)
+      setLoading(false); // Set loading to false after fetching completes
     }
     console.log("Fetching leaderboard...")
   };

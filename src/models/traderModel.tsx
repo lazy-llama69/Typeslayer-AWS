@@ -15,7 +15,7 @@ import { Item } from "../items/item";
     itemsForSale: Item[]; // List of items the trader is selling
   
     constructor() {
-      // Define some items for sale (could be weapons, armor, potions)
+      // Define items for sale
       this.itemsForSale = [
         healingPotion,
         ironSword,

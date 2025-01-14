@@ -41,7 +41,7 @@ const Practice = () => {
         } catch (error) {
             console.error('Error fetching word dictionary:', error);
         } finally {
-            setLoading(false); // Mark as loaded when done
+            setLoading(false); 
         }
     };
 
@@ -263,6 +263,7 @@ const Practice = () => {
         }
     };
     
+    // Hides options based on current tab
     const handleHideRest = (value: string) => {
         setCurrentTab(value);
         setCurrentTab(value);
@@ -418,9 +419,6 @@ const Practice = () => {
                 <Menu isOpen={isMenuOpen} onOpenChange={handleMenuOpenChange} width="15rem" size="large">
                     <MenuItem onClick={() => { closeMenu(); alert('Resume Game'); }}>
                         Resume Game
-                    </MenuItem>
-                    <MenuItem isDisabled onClick={() => { closeMenu(); alert('Settings'); }}>
-                        Settings
                     </MenuItem>
                     <MenuButton variation="destructive" onClick={() => { closeMenu(); handleReturnToMenu(); }}>
                         Exit to Main Menu

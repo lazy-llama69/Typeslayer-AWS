@@ -7,7 +7,7 @@ import { FaPlay, FaPause } from "react-icons/fa";
 const Settings = () => {
     const { volume, setVolume, pauseMusic, playMusic } = useMusic(); // Use volume and setVolume from MusicContext
     const navigate = useNavigate();
-    const [ musicStatus, setMusicStatus] = useState(false);
+    const [ musicStatus, setMusicStatus] = useState(true);
 
     const handleReturnToMenu = () => {
         navigate('/');
