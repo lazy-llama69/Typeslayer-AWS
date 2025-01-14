@@ -1,13 +1,14 @@
 // pathSelection.tsx
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button, Collection, Card, Image, View, Flex, Badge, Divider, Heading, Breadcrumbs, ThemeProvider, createTheme  } from '@aws-amplify/ui-react';
+import { Button, Collection, Card, Image, View, Flex, Badge, Divider, Heading, Breadcrumbs, ThemeProvider, createTheme, ScrollView  } from '@aws-amplify/ui-react';
 import forestCabin from '/assets/paths/forest_cabin.jpg';
 import ybr from '/assets/paths/yellowbrickroad.jpg';
 import shop from '/assets/paths/shop.jpg';
 import haunted_castle from '/assets/paths/haunted_castle.png'
 import { FaArrowRight } from "react-icons/fa";
-
+import axios from 'axios';
+import { PlayerModel } from './models/playerModel';
 
 
 // Interface for Path Item
@@ -21,27 +22,29 @@ interface PathItem {
 
 const PathSelection = () => {
     const navigate = useNavigate();
-    const { defeatedBossCount } = useParams();
+    const { defeatedBossCount: totalDefeatedBossCount } = useParams();
     const [selectedPath, setSelectedPath] = useState<number | null>(null);
     const [breadcrumbs, setBreadcrumbs] = useState<string[]>(['Start']);
     const shopAppears = Math.random() < 1; // 100% chance for the Shop to appear
     const [randomLocation, setRandomLocation] = useState<PathItem[]>([]); // Use state for locations
+    const [player, setPlayer] = useState<PlayerModel | null>(null);
+    const [defeatedBossCount, setDefeatedBossCount] = useState<number>(0); // Track number of defeated bosses
+    
     // Handle return to menu
     const handleReturnToMenu = () => {
-        localStorage.clear();
-        navigate('/');
+        handleEnd();
     };
     // Define the paths
     const locations: PathItem[] = [
         {
             title: 'The Dark Forest',
-            badges: ['Easy', 'Poison'],
+            badges: ['Hard', 'Poison'],
             imageUrl: forestCabin,
             pathId: 1,
         },
         {
             title: 'Yellow Brick Road',
-            badges: ['Hard', 'Heal'],
+            badges: ['Easy', 'Heal'],
             imageUrl: ybr,
             pathId: 2,
         },
@@ -66,6 +69,8 @@ const PathSelection = () => {
         }
         // Generate random locations
         setRandomLocation(getRandomLocations());
+        setDefeatedBossCount(parseInt(totalDefeatedBossCount || '0', 10));
+        loadPlayerData();
     }, []);
 
     // Handle name submission and path selection
@@ -117,28 +122,71 @@ const PathSelection = () => {
         return shuffled.slice(0, 3);
     };
 
+    const loadPlayerData = () => {
+        const storedPlayerData = localStorage.getItem('playerData');
+        if(storedPlayerData){
+            const parsedPlayer = JSON.parse(storedPlayerData);
+            const reconstructedPlayer = Object.assign(new PlayerModel(parsedPlayer.id,parsedPlayer.username), parsedPlayer);
+            setPlayer(reconstructedPlayer);  // Set the player with the data from localStorage
+        }
+    }
+    const handleEnd = () => {
+        console.log(player)
+        if (!player?.score){
+            // updateLeaderboard(player?.username ?? 'error',0);
+            console.log("Missing score")
+        } else {
+            updateLeaderboard(player?.username, player?.score);
+        }
+        localStorage.clear();
+        navigate('/');
+    };
+    
+    const updateLeaderboard = async (name: string, score: number) => {  
+    console.log("This is the name and score", name,score);
+    try {
+        const bossCount = defeatedBossCount;
+        const response = await axios.post("https://5sovduu1i1.execute-api.ap-southeast-2.amazonaws.com/dev/leaderboard", {
+            username: name,
+            score: score,
+            bossCount: bossCount,
+        });
+        console.log('Leaderboard updated', response.data);
+    } catch (error) { 
+        console.error('Error updating leaderboard:', error);
+    }
+    };    
+
+
+
     return (
     <View padding="2rem">
         {/* Breadcrumbs Component */}
-        <ThemeProvider theme={theme}>
-            <Breadcrumbs.Container borderRadius="medium" padding="medium">
-                {breadcrumbs.map((text, idx) => (
-                    
-                    <Breadcrumbs.Item key={`${idx}`} color={"#3F00FF"}>
-                        <Breadcrumbs.Link 
-                            isCurrent={idx === breadcrumbs.length - 1}
-                            style={{
-                                fontWeight: 'bold',
-                                
-                            }}
-                        >
-                            {text}
-                        </Breadcrumbs.Link>
-                        {idx !== breadcrumbs.length - 1 && <FaArrowRight color= "pink" size="25px"/>} {/* Add separator except for the last item */}
-                    </Breadcrumbs.Item>
-                ))}
-            </Breadcrumbs.Container>
-        </ThemeProvider>
+        <ScrollView
+                width="1500px"  // Width smaller than the content
+                height='60px'
+                autoScroll="instant"
+        >
+            <ThemeProvider theme={theme}>
+                <Breadcrumbs.Container borderRadius="medium" padding="medium">
+                    {breadcrumbs.map((text, idx) => (
+                        
+                        <Breadcrumbs.Item key={`${idx}`} color={"#3F00FF"}>
+                            <Breadcrumbs.Link 
+                                isCurrent={idx === breadcrumbs.length - 1}
+                                style={{
+                                    fontWeight: 'bold',
+                                    
+                                }}
+                            >
+                                {text}
+                            </Breadcrumbs.Link>
+                            {idx !== breadcrumbs.length - 1 && <FaArrowRight color= "pink" size="25px"/>} {/* Add separator except for the last item */}
+                        </Breadcrumbs.Item>
+                    ))}
+                </Breadcrumbs.Container>
+            </ThemeProvider>
+        </ScrollView>
         <Flex direction="column" gap="0.5rem" justifyContent="center" alignItems="center">
             <Heading level={2} marginTop="1rem">
                 Choose Your Path
