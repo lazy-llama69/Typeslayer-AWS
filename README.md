@@ -4,7 +4,7 @@
 
 **TypeSlayer** is an engaging RPG-inspired typing game with roguelike elements, designed to help players improve their typing skills while enjoying a fun and immersive experience. Players slay monsters by typing words, earn gold, and purchase items such as armors, potions, and weapons-each with unique stats-to enhance their character's abilities. The game features a practice mode for honing typing skills and includes a leaderboard to add a competitive edge.
 
-Try it out [here](https://main.dkvntrk2zpgvn.amplifyapp.com)
+Try it out [here](https://main.d1hbow10af0qan.amplifyapp.com)
 ## Features
 
 - **Typing-Based Gameplay**: Type to defeat monsters and progress through endless waves.
